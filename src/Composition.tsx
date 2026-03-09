@@ -1,3 +1,10 @@
+import { AbsoluteFill } from "remotion";
+import { SlackLayout } from "./components/SlackLayout";
+
 export const MyComposition = () => {
-  return null;
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#1a1d21" }}>
+      <SlackLayout />
+    </AbsoluteFill>
+  );
 };
