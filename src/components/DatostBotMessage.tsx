@@ -32,6 +32,16 @@ export interface Attachment {
   name: string;
   description?: string;
   url?: string;
+  /** For rich file previews: "excel" | "pdf" */
+  fileType?: "excel" | "pdf";
+  /** Display title (shown large in the preview card) */
+  title?: string;
+  /** Preview table data for Excel-type attachments */
+  previewRows?: string[][];
+  /** Preview table headers for Excel-type attachments */
+  previewHeaders?: string[];
+  /** Preview image path (use staticFile) for PDF previews */
+  previewImage?: string;
 }
 
 export interface BotResponseContent {
@@ -207,45 +217,292 @@ const ActionButton: React.FC<{ children: React.ReactNode }> = ({
 
 // --- Main component ---
 
-const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
-  attachment,
-}) => (
+// --- Excel file icon (green "X") ---
+const ExcelIcon: React.FC = () => (
   <div
     style={{
+      width: 38,
+      height: 38,
+      borderRadius: 6,
+      backgroundColor: "#1D6F42",
       display: "flex",
       alignItems: "center",
-      gap: 10,
-      padding: "8px 12px",
-      border: "1px solid #35373b",
-      borderRadius: 8,
-      backgroundColor: "rgba(255,255,255,0.02)",
-      margin: "8px 0",
+      justifyContent: "center",
+      flexShrink: 0,
     }}
   >
-    <span style={{ fontSize: 18, flexShrink: 0 }}>
-      {attachment.type === "file" ? "📎" : "🔗"}
-    </span>
-    <div style={{ minWidth: 0 }}>
-      <div
-        style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: attachment.type === "link" ? "#1d9bd1" : "#d1d2d3",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {attachment.name}
-      </div>
-      {attachment.description && (
-        <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
-          {attachment.description}
-        </div>
-      )}
-    </div>
+    <span style={{ color: "#fff", fontSize: 20, fontWeight: 800 }}>X</span>
   </div>
 );
+
+// --- PDF file icon (red document) ---
+const PdfIcon: React.FC = () => (
+  <div
+    style={{
+      width: 38,
+      height: 38,
+      borderRadius: 6,
+      backgroundColor: "#D93025",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    }}
+  >
+    <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>PDF</span>
+  </div>
+);
+
+// --- Mini spreadsheet preview ---
+const SpreadsheetPreview: React.FC<{
+  headers?: string[];
+  rows?: string[][];
+}> = ({ headers, rows }) => {
+  if (!headers || !rows) return null;
+
+  // Color coding based on risk level in last column
+  const getRiskColor = (risk: string): string => {
+    if (risk.includes("Critical")) return "rgba(224,86,79,0.15)";
+    if (risk.includes("High")) return "rgba(255,165,0,0.12)";
+    if (risk.includes("Moderate")) return "rgba(255,255,0,0.08)";
+    if (risk.includes("Low")) return "rgba(43,172,118,0.1)";
+    return "transparent";
+  };
+
+  const getRiskTextColor = (risk: string): string => {
+    if (risk.includes("Critical")) return "#e0564f";
+    if (risk.includes("High")) return "#e8963e";
+    if (risk.includes("Moderate")) return "#c9b458";
+    if (risk.includes("Low")) return "#2bac76";
+    return "#666";
+  };
+
+  return (
+    <div
+      style={{
+        backgroundColor: "#fafafa",
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+        padding: "6px 4px",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ transform: "scale(0.92)", transformOrigin: "top left", width: "108%" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          fontSize: 8,
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          tableLayout: "fixed",
+        }}
+      >
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th
+                key={i}
+                style={{
+                  padding: "3px 4px",
+                  fontSize: 7,
+                  fontWeight: 700,
+                  color: "#fff",
+                  backgroundColor: "#4472C4",
+                  textAlign: "left",
+                  whiteSpace: "nowrap",
+                  borderRight: "1px solid #3a63a8",
+                }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => {
+            const riskVal = row[row.length - 1] || "";
+            const bgColor = getRiskColor(riskVal);
+            return (
+              <tr key={ri}>
+                {row.map((cell, ci) => {
+                  const isRiskCol = ci === row.length - 1;
+                  return (
+                    <td
+                      key={ci}
+                      style={{
+                        padding: "2px 4px",
+                        fontSize: 7,
+                        color: isRiskCol ? getRiskTextColor(cell) : "#333",
+                        fontWeight: isRiskCol || ci === 0 ? 600 : 400,
+                        backgroundColor: bgColor,
+                        borderBottom: "1px solid #e0e0e0",
+                        borderRight: "1px solid #e8e8e8",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {cell}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  );
+};
+
+// --- PDF document preview (uses actual image, clipped like Slack) ---
+const PdfPreview: React.FC<{ previewImage?: string }> = ({ previewImage }) => {
+  if (!previewImage) return null;
+  return (
+    <div
+      style={{
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+        overflow: "hidden",
+        backgroundColor: "#fafafa",
+        maxHeight: 120,
+      }}
+    >
+      <img
+        src={previewImage}
+        style={{
+          width: "100%",
+          display: "block",
+        }}
+      />
+    </div>
+  );
+};
+
+// --- Rich file preview card ---
+const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
+  attachment,
+}) => {
+  const isExcel = attachment.fileType === "excel";
+  const isPdf = attachment.fileType === "pdf";
+  const label = isExcel ? "Excel Spreadsheet" : isPdf ? "PDF" : "File";
+  const displayTitle = attachment.title || attachment.name;
+
+  return (
+    <div style={{ margin: "6px 0" }}>
+      {/* Section label */}
+      <div
+        style={{
+          fontSize: 12,
+          color: "#d1d2d3",
+          marginBottom: 4,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <span>{label}</span>
+        <span style={{ fontSize: 9, color: "#9ea0a5" }}>▼</span>
+      </div>
+
+      {/* Preview card */}
+      <div
+        style={{
+          border: "1px solid #35373b",
+          borderRadius: 8,
+          overflow: "hidden",
+          backgroundColor: "#1a1d21",
+          maxWidth: 380,
+        }}
+      >
+        {/* Card header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "8px 10px",
+          }}
+        >
+          {isExcel ? <ExcelIcon /> : <PdfIcon />}
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#d1d2d3",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {displayTitle}
+            </div>
+            <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
+              {label}
+            </div>
+          </div>
+        </div>
+
+        {/* Preview content */}
+        {isExcel && (
+          <SpreadsheetPreview
+            headers={attachment.previewHeaders}
+            rows={attachment.previewRows?.slice(0, 6)}
+          />
+        )}
+        {isPdf && <PdfPreview previewImage={attachment.previewImage} />}
+      </div>
+    </div>
+  );
+};
+
+// --- Simple attachment card (for links and generic files) ---
+const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
+  attachment,
+}) => {
+  // Use rich preview for Excel/PDF files
+  if (attachment.fileType === "excel" || attachment.fileType === "pdf") {
+    return <FilePreviewCard attachment={attachment} />;
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 12px",
+        border: "1px solid #35373b",
+        borderRadius: 8,
+        backgroundColor: "rgba(255,255,255,0.02)",
+        margin: "8px 0",
+      }}
+    >
+      <span style={{ fontSize: 18, flexShrink: 0 }}>
+        {attachment.type === "file" ? "📎" : "🔗"}
+      </span>
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: attachment.type === "link" ? "#1d9bd1" : "#d1d2d3",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {attachment.name}
+        </div>
+        {attachment.description && (
+          <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
+            {attachment.description}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   startFrame,
@@ -303,7 +560,7 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
             <span>✅</span>
             <span style={{ marginLeft: 4 }}>{response.statsSucceeded}</span>
             <span>•</span>
-            <span>🔴</span>
+            <span>⏱️</span>
             <span style={{ marginLeft: 4 }}>{response.statsTime}</span>
           </div>
 

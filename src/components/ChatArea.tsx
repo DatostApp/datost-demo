@@ -389,7 +389,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path
-                    d="M2 7L12 2V12L2 7Z"
+                    d="M1 1L13 7L1 13V8.75L8 7L1 5.25V1Z"
                     fill="#fff"
                   />
                 </svg>

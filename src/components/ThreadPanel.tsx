@@ -394,7 +394,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 }}
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <path d="M2 7L12 2V12L2 7Z" fill="#fff" />
+                  <path d="M1 1L13 7L1 13V8.75L8 7L1 5.25V1Z" fill="#fff" />
                 </svg>
               </div>
             </div>
