@@ -1,6 +1,76 @@
 import React from "react";
+import { useCurrentFrame, staticFile } from "remotion";
 import { SlackMessage, Mention } from "./SlackMessage";
+import { FOCUS_MSG_TARGET } from "./CursorTargetContext";
 import { TypingIndicator } from "./TypingIndicator";
+
+// ─── Thread reply indicator types ─────────────────────────────────────────────
+
+export type ThreadReplyParticipant = "maceo" | "jason" | "bot";
+
+export interface ThreadReply {
+  frame: number;
+  participant: ThreadReplyParticipant;
+}
+
+// ─── Small avatar for thread indicator ────────────────────────────────────────
+
+const PARTICIPANT_CONFIG = {
+  maceo: { color: "#4a154b", initial: "M" },
+  jason: { color: "#2b5e3a", initial: "J" },
+  bot: null, // uses Datost icon
+} as const;
+
+const SmallAvatar: React.FC<{ participant: ThreadReplyParticipant }> = ({
+  participant,
+}) => {
+  if (participant === "bot") {
+    return (
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 4,
+          backgroundColor: "#f0ebe4",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        <img
+          src={staticFile("datost-icon.svg")}
+          alt="Datost"
+          style={{ width: 18, height: 18 }}
+        />
+      </div>
+    );
+  }
+
+  const config = PARTICIPANT_CONFIG[participant];
+  return (
+    <div
+      style={{
+        width: 22,
+        height: 22,
+        borderRadius: 4,
+        backgroundColor: config.color,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 10,
+        fontWeight: 700,
+        color: "#fff",
+        flexShrink: 0,
+      }}
+    >
+      {config.initial}
+    </div>
+  );
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ToolbarButton: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -20,6 +90,26 @@ const ToolbarButton: React.FC<{ children: React.ReactNode }> = ({
   </div>
 );
 
+const FormatButton: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <div
+    style={{
+      width: 28,
+      height: 28,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 4,
+      color: "#9ea0a5",
+    }}
+  >
+    {children}
+  </div>
+);
+
+// ─── Main component ──────────────────────────────────────────────────────────
+
 interface ChatAreaProps {
   channel?: string;
   message?: React.ReactNode;
@@ -38,10 +128,11 @@ interface ChatAreaProps {
   highlightThreadFrame?: number;
   cursorTargetId?: string;
   replyTargetId?: string;
+  threadReplies?: ThreadReply[];
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({
-  channel = "cs-renewals",
+  channel = "general",
   message,
   messageAuthor = "Maceo",
   messageAvatarColor = "#4a154b",
@@ -58,7 +149,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   highlightThreadFrame = 130,
   cursorTargetId = "maceoMessage",
   replyTargetId = "replyButton",
+  threadReplies = [],
 }) => {
+  const frame = useCurrentFrame();
+
+  // Calculate visible replies and unique participants
+  const visibleReplies = threadReplies.filter((r) => frame >= r.frame);
+  const replyCount = visibleReplies.length;
+  const participants = [
+    ...new Set(visibleReplies.map((r) => r.participant)),
+  ];
+
   return (
     <div
       style={{
@@ -125,6 +226,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           highlightThreadFrame={highlightThreadFrame}
           cursorTargetId={cursorTargetId}
           replyTargetId={replyTargetId}
+          cameraTargetId={FOCUS_MSG_TARGET}
         >
           {message ?? (
             <>
@@ -135,6 +237,43 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             </>
           )}
         </SlackMessage>
+
+        {/* Thread reply indicator */}
+        {replyCount > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginLeft: 44,
+              marginTop: 8,
+              padding: "4px 0",
+            }}
+          >
+            {/* Participant avatars */}
+            <div style={{ display: "flex", gap: 2 }}>
+              {participants.map((p) => (
+                <SmallAvatar key={p} participant={p} />
+              ))}
+            </div>
+
+            {/* Reply count */}
+            <span
+              style={{
+                color: "#1d9bd1",
+                fontSize: 13,
+                fontWeight: 700,
+              }}
+            >
+              {replyCount} {replyCount === 1 ? "reply" : "replies"}
+            </span>
+
+            {/* Last reply time */}
+            <span style={{ color: "#616061", fontSize: 12 }}>
+              Last reply today at 2:43 PM
+            </span>
+          </div>
+        )}
 
         <TypingIndicator name={typingName} startFrame={typingStartFrame} endFrame={typingEndFrame} />
       </div>
@@ -262,21 +401,3 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     </div>
   );
 };
-
-const FormatButton: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => (
-  <div
-    style={{
-      width: 28,
-      height: 28,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 4,
-      color: "#9ea0a5",
-    }}
-  >
-    {children}
-  </div>
-);

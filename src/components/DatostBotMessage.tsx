@@ -48,6 +48,8 @@ export interface BotResponseContent {
   analysisText?: React.ReactNode;
   /** Optional file/link attachments */
   attachments?: Attachment[];
+  /** Optional images shown after analysis (use staticFile paths) */
+  images?: string[];
   /** Data source label */
   source: string;
   /** Timestamp shown on the final response */
@@ -57,7 +59,6 @@ export interface BotResponseContent {
 export interface DatostBotMessageProps {
   // --- Timing ---
   startFrame: number;
-  phase2Frame: number;
   cycle1Frame: number;
   /** Per-tool done frames — one entry per tool */
   toolDoneFrames: number[];
@@ -65,14 +66,6 @@ export interface DatostBotMessageProps {
   finalResponseFrame: number;
 
   // --- Content ---
-  /** Phase 1 loading text (default: "Looking into that...") */
-  phase1Text?: string;
-  /** Phase 1 emoji (default: "🤔") */
-  phase1Emoji?: string;
-  /** Phase 2 loading text (default: "Querying your data sources...") */
-  phase2Text?: string;
-  /** Phase 2 emoji (default: "🔄") */
-  phase2Emoji?: string;
   /** Tool calls shown during cycle phases */
   tools?: ToolCall[];
   /** If tools list is truncated, show "and N more" */
@@ -256,15 +249,10 @@ const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
 
 export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   startFrame,
-  phase2Frame,
   cycle1Frame,
   toolDoneFrames,
   cycle2Frame,
   finalResponseFrame,
-  phase1Text = "Looking into that...",
-  phase1Emoji = "🤔",
-  phase2Text = "Querying your data sources...",
-  phase2Emoji = "🔄",
   tools = [],
   additionalToolCount,
   response,
@@ -283,11 +271,9 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   const opacity = interpolate(enterProgress, [0, 1], [0, 1]);
   const translateY = interpolate(enterProgress, [0, 1], [20, 0]);
 
-  // Determine current phase
+  // Determine current phase — goes straight to tool execution
   const isFinal = frame >= finalResponseFrame;
   const isCycle2 = !isFinal && frame >= cycle2Frame;
-  const isCycle1 = !isFinal && !isCycle2 && frame >= cycle1Frame;
-  const isQuerying = !isFinal && !isCycle2 && !isCycle1 && frame >= phase2Frame;
 
   const renderPhaseContent = () => {
     if (isFinal) {
@@ -355,6 +341,19 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               {response.analysisText}
             </div>
           )}
+
+          {/* Images */}
+          {response.images?.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              style={{
+                width: "100%",
+                borderRadius: 6,
+                margin: "8px 0",
+              }}
+            />
+          ))}
 
           {/* Attachments */}
           {response.attachments?.map((att, i) => (
@@ -445,84 +444,50 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
       );
     }
 
-    if (isCycle1) {
-      return (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              marginBottom: 6,
-            }}
-          >
-            <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
-              Cycle 1
-            </span>
-            <span>🕐</span>
-          </div>
-          {tools.map((tool, i) => {
-            const doneFrame = toolDoneFrames[i] ?? toolDoneFrames[toolDoneFrames.length - 1];
-            const toolStartFrame =
-              i === 0
-                ? cycle1Frame + 5
-                : (toolDoneFrames[i - 1] ?? cycle1Frame) + 8;
-            return (
-              <ToolItem
-                key={i}
-                text={tool.name}
-                done={frame >= doneFrame}
-                timing={frame >= doneFrame ? tool.timing : undefined}
-                startFrame={toolStartFrame}
-              />
-            );
-          })}
-          {additionalToolCount !== undefined && additionalToolCount > 0 && (
-            <div
-              style={{
-                fontSize: 12,
-                color: "#7c7e83",
-                padding: "3px 0",
-                marginLeft: 19,
-              }}
-            >
-              and {additionalToolCount} more...
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    if (isQuerying) {
-      return (
+    // Tool execution phase (cycle1 — default before cycle2/final)
+    return (
+      <div>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 6,
-            color: "#9ea0a5",
-            fontSize: 14,
+            marginBottom: 6,
           }}
         >
-          <span style={{ flexShrink: 0 }}>{phase2Emoji}</span>
-          <span>{phase2Text}</span>
+          <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
+            Cycle 1
+          </span>
+          <span>🕐</span>
         </div>
-      );
-    }
-
-    // Phase 1
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          color: "#9ea0a5",
-          fontSize: 14,
-        }}
-      >
-        <span style={{ flexShrink: 0 }}>{phase1Emoji}</span>
-        <span>{phase1Text}</span>
+        {tools.map((tool, i) => {
+          const doneFrame = toolDoneFrames[i] ?? toolDoneFrames[toolDoneFrames.length - 1];
+          const toolStartFrame =
+            i === 0
+              ? cycle1Frame + 5
+              : (toolDoneFrames[i - 1] ?? cycle1Frame) + 8;
+          return (
+            <ToolItem
+              key={i}
+              text={tool.name}
+              done={frame >= doneFrame}
+              timing={frame >= doneFrame ? tool.timing : undefined}
+              startFrame={toolStartFrame}
+            />
+          );
+        })}
+        {additionalToolCount !== undefined && additionalToolCount > 0 && (
+          <div
+            style={{
+              fontSize: 12,
+              color: "#7c7e83",
+              padding: "3px 0",
+              marginLeft: 19,
+            }}
+          >
+            and {additionalToolCount} more...
+          </div>
+        )}
       </div>
     );
   };

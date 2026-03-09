@@ -1,6 +1,7 @@
 import React from "react";
 import { interpolate, useCurrentFrame, Easing } from "remotion";
 import { useCursorPositions } from "./CursorTargetContext";
+import { useCursorPositionRef } from "./CursorPositionContext";
 
 interface CursorKeyframe {
   frame: number;
@@ -19,9 +20,11 @@ interface CursorProps {
 export const Cursor: React.FC<CursorProps> = ({ keyframes, clickFrame, hideFrame }) => {
   const frame = useCurrentFrame();
   const getPosition = useCursorPositions();
+  const posRef = useCursorPositionRef();
 
-  if (frame < keyframes[0].frame) return null;
-  if (hideFrame !== undefined && frame >= hideFrame) return null;
+  const hidden =
+    frame < keyframes[0].frame ||
+    (hideFrame !== undefined && frame >= hideFrame);
 
   // Resolve each keyframe to actual coordinates
   const resolved = keyframes.map((k) => {
@@ -48,7 +51,11 @@ export const Cursor: React.FC<CursorProps> = ({ keyframes, clickFrame, hideFrame
     easing: Easing.inOut(Easing.ease),
   });
 
-  // Click pulse
+  // Publish position so CameraContainer can track us
+  posRef.current = hidden ? null : { x, y };
+
+  if (hidden) return null;
+
   let scale = 1;
   if (
     clickFrame !== undefined &&

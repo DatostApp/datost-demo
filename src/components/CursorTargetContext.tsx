@@ -1,5 +1,10 @@
 import React, { createContext, useCallback, useContext, useRef, useState, useEffect } from "react";
 import { useVideoConfig } from "remotion";
+import { useLatestMessageRef, useReplyBoxRef, useFocusRectRef } from "./CursorPositionContext";
+
+export const LATEST_MSG_TARGET = "__latestMessage";
+export const FOCUS_MSG_TARGET = "__focusMessage";
+export const REPLY_BOX_TARGET = "threadReplyBox";
 
 interface Position {
   x: number;
@@ -25,6 +30,9 @@ export const CursorTargetProvider: React.FC<{ children: React.ReactNode }> = ({
   const [positions, setPositions] = useState<Record<string, Position>>({});
   // Keep last known positions so targets that unmount don't cause jumps
   const lastKnownRef = useRef<Record<string, Position>>({});
+  const latestMsgRef = useLatestMessageRef();
+  const replyBoxRef = useReplyBoxRef();
+  const focusRectRef = useFocusRectRef();
 
   const register = useCallback((id: string, el: HTMLElement | null) => {
     if (el) {
@@ -56,6 +64,23 @@ export const CursorTargetProvider: React.FC<{ children: React.ReactNode }> = ({
           y: (rect.y - rootRect.y + rect.height / 2) * scaleY,
         };
         lastKnownRef.current[id] = pos;
+        // Bridge latest-message position to the shared camera ref
+        if (id === LATEST_MSG_TARGET) {
+          latestMsgRef.current = pos;
+        }
+        // Bridge reply box position for camera to track during typing
+        if (id === REPLY_BOX_TARGET) {
+          replyBoxRef.current = pos;
+        }
+        // Bridge focus-message full rect for camera zoom calculation
+        if (id === FOCUS_MSG_TARGET) {
+          focusRectRef.current = {
+            x: pos.x,
+            y: pos.y,
+            width: rect.width * scaleX,
+            height: rect.height * scaleY,
+          };
+        }
       }
 
       // Spread all last known positions (includes unmounted targets)
@@ -68,7 +93,7 @@ export const CursorTargetProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [compWidth, compHeight]);
+  }, [compWidth, compHeight, latestMsgRef, replyBoxRef, focusRectRef]);
 
   const getPosition = useCallback(
     (id: string): Position | null => positions[id] ?? null,

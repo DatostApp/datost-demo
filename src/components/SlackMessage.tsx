@@ -26,6 +26,8 @@ export interface SlackMessageProps {
   cursorTargetId?: string;
   /** Cursor target ID for the reply button */
   replyTargetId?: string;
+  /** Camera target ID — registers the full message container for camera framing */
+  cameraTargetId?: string;
   /** Continuation message — no avatar or name, just aligned text */
   continuation?: boolean;
   /** Skip the slide/fade entrance animation */
@@ -48,12 +50,14 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
   highlightThreadFrame,
   cursorTargetId,
   replyTargetId,
+  cameraTargetId,
   continuation,
   noAnimation,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const messageRef = useCursorTarget(cursorTargetId ?? "__unused_msg");
+  const cameraRef = useCursorTarget(cameraTargetId ?? "__unused_cam");
 
   const progress = spring({
     frame: frame - startFrame,
@@ -121,6 +125,7 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
 
   return (
     <div
+      ref={cameraTargetId ? cameraRef : undefined}
       style={{
         display: "flex",
         gap: 8,

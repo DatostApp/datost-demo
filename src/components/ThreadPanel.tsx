@@ -6,6 +6,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { useCursorTarget } from "./CursorTargetContext";
+import { useThreadContentHeightRef } from "./CursorPositionContext";
 import { TypingTextBox } from "./TypingTextBox";
 
 interface ReplyTypingSession {
@@ -53,6 +54,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrollOffset, setScrollOffset] = useState(0);
+  const threadHeightRef = useThreadContentHeightRef();
 
   // Measure content vs container and auto-scroll to keep bottom visible.
   // Intentionally runs every render (every frame) to track dynamic content.
@@ -63,6 +65,8 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
       const contentH = contentRef.current.scrollHeight;
       const overflow = Math.max(0, contentH - containerH);
       setScrollOffset(overflow);
+      // Publish content height so the camera can derive dynamic zoom
+      threadHeightRef.current = contentH;
     }
   });
 
@@ -152,7 +156,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 whiteSpace: "nowrap",
               }}
             >
-              #cs-renewals
+              #general
             </span>
             <div
               style={{

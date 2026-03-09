@@ -251,7 +251,7 @@ export const Sidebar: React.FC = () => {
       {/* Channel list */}
       <div
         style={{
-          width: 200,
+          width: 260,
           backgroundColor: "#1a1d21",
           borderRight: "1px solid #35373b",
           display: "flex",
@@ -276,8 +276,8 @@ export const Sidebar: React.FC = () => {
 
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
           <SectionHeader label="Channels" />
-          <ChannelItem name="general" />
-          <ChannelItem name="cs-renewals" active />
+          <ChannelItem name="general" active />
+          <ChannelItem name="cs-renewals" />
           <ChannelItem name="all-datost" />
           <ChannelItem name="social" />
 

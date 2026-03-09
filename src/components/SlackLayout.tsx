@@ -1,11 +1,11 @@
 import React from "react";
 import { TitleBar } from "./TitleBar";
 import { Sidebar } from "./Sidebar";
-import { ChatArea } from "./ChatArea";
+import { ChatArea, type ThreadReply } from "./ChatArea";
 import { ThreadPanel } from "./ThreadPanel";
 import { Cursor } from "./Cursor";
 import { SlackMessage, Mention } from "./SlackMessage";
-import { CursorTargetProvider } from "./CursorTargetContext";
+import { CursorTargetProvider, LATEST_MSG_TARGET, useCursorTarget } from "./CursorTargetContext";
 import { StreamingMessageContent } from "./StreamingMessageContent";
 import {
   DatostBotMessage,
@@ -13,11 +13,10 @@ import {
   type TableColumn,
   type ToolCall,
 } from "./DatostBotMessage";
-import { TypingIndicator } from "./TypingIndicator";
+import { staticFile } from "remotion";
+
 
 // ─── Character constants ─────────────────────────────────────────────────────
-// Script "Adi" = code "Maceo" (purple #4a154b, initial M)
-// Script "Maceo" = code "Jason" (green #2b5e3a, initial J)
 
 const MACEO = { author: "Maceo", color: "#4a154b", initial: "M" } as const;
 const JASON = { author: "Jason", color: "#2b5e3a", initial: "J" } as const;
@@ -84,42 +83,23 @@ const BOT2_RESPONSE: BotResponseContent = {
   responseText: (
     <>
       <div style={{ margin: "0 0 8px" }}>
-        Two very different patterns here:
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Rivian</strong> is the most concerning — that's not a gradual
-        decline, it's a <strong>cliff</strong>. Usage was steady at ~12K
-        sessions/week then fell off completely the{" "}
-        <strong>week of January 20th</strong> down to ~3K. Something specific
-        happened. That kind of sudden drop usually means a blocker, not
-        disengagement.
+        <strong>Rivian</strong> is the most concerning — usage was steady at ~12K
+        sessions/week then{" "}
+        <strong>dropped off a cliff the week of January 20th</strong>. That's
+        not gradual disengagement, something specific broke.
       </div>
       <div style={{ margin: "0 0 8px" }}>
         <strong>Plaid</strong> is the opposite — a slow, steady fade from 8,900
         down to 3,740 over 13 weeks. No single event, just gradual
-        disengagement. That's typically harder to reverse because it signals
-        loss of interest rather than a fixable incident.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Brex</strong> mirrors Rivian's pattern on a smaller scale —
-        stable until mid-February then a sudden drop. Worth investigating
-        whether the same root cause hit both.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Lattice</strong> is a slow bleed — down a little every week,
-        consistent decline.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Ramp</strong> and <strong>Notion</strong> are essentially
-        stable. Ramp has a slight drift (-10%) but nothing alarming. Notion is
-        healthy and growing.
+        disengagement. Harder to reverse.
       </div>
       <div>
-        I'd dig into what happened at Rivian the week of Jan 20th — that cliff
-        pattern almost always points to something specific that broke.
+        <strong>Brex</strong> mirrors Rivian's pattern on a smaller scale. Ramp
+        and Notion are stable.
       </div>
     </>
   ),
+  images: [staticFile("usage_trend_chart.png")],
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
@@ -137,23 +117,15 @@ const BOT3_RESPONSE: BotResponseContent = {
   statsTime: "1,348ms total",
   responseText: (
     <>
-      <div style={{ margin: "0 0 8px" }}>Two very different stories here:</div>
       <div style={{ margin: "0 0 8px" }}>
-        <strong>Rivian — 11 support tickets</strong>
-        <br />7 are about the <strong>same issue</strong> — their SSO
-        integration broke after the February platform update (v4.2). Their team
-        can't log in reliably. It's been escalated twice with no resolution. The
-        other 4 tickets are minor UI bugs.
+        <strong>Rivian — 11 support tickets.</strong> 7 are about the same
+        issue — their SSO integration broke after the February platform update
+        (v4.2). Their team can't log in reliably. Escalated twice, no
+        resolution.
       </div>
       <div style={{ margin: "0 0 8px" }}>
-        That explains the cliff drop in the usage chart. If their team literally
-        can't log in, of course sessions fell off a cliff the week of Jan 20th.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Plaid — 3 tickets + NPS flag</strong>
-        <br />
-        Only 3 support tickets, all minor. But their most recent NPS response is
-        a <strong>score of 4</strong> with this comment:
+        <strong>Plaid — 3 tickets + NPS flag.</strong> Only minor support
+        tickets, but their latest NPS is a <strong>4 out of 10</strong>:
       </div>
       <div
         style={{
@@ -168,17 +140,11 @@ const BOT3_RESPONSE: BotResponseContent = {
         "We've outgrown the reporting features. Evaluating alternatives that
         offer better analytics."
       </div>
-      <div style={{ margin: "0 0 8px" }}>
-        Two other Plaid users gave similar feedback about the reporting
-        limitations.
-      </div>
       <div>
-        <strong>These are two very different churn signals.</strong> Rivian is
-        frustrated because something <strong>broke</strong> — that's fixable. If
-        the SSO issue from the v4.2 update gets resolved, there's a good chance
-        they re-engage. Plaid is a harder problem — they're not broken, they're{" "}
-        <strong>outgrowing us</strong>. That's a product gap conversation, not a
-        support ticket.
+        <strong>Two different churn signals.</strong> Rivian is frustrated
+        because something <strong>broke</strong> — fixable. Plaid is{" "}
+        <strong>outgrowing us</strong> — that's a product gap, not a support
+        ticket.
       </div>
     </>
   ),
@@ -217,22 +183,17 @@ const BOT4_RESPONSE: BotResponseContent = {
   responseText: (
     <>
       <div style={{ margin: "0 0 8px" }}>
-        The strongest predictor of churn risk isn't just usage decline — it's{" "}
+        Accounts with{" "}
         <strong>
-          low integration adoption combined with recent support friction
-        </strong>
-        . Accounts with fewer than 3 active integrations AND a support ticket or
-        low NPS in the last 30 days have a{" "}
-        <strong>6x higher rate of usage decline</strong> (p {"<"} 0.001).
+          low integration adoption + recent support friction
+        </strong>{" "}
+        have a <strong>6x higher rate of usage decline</strong> (p {"<"} 0.001).
+        Integration depth is the sticky factor — 3+ integrations and accounts
+        almost never churn.
       </div>
-      <div style={{ margin: "0 0 8px" }}>
-        Accounts with 3+ integrations almost never churn, regardless of ticket
-        volume. Integration depth is the sticky factor.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        But here's what I'd flag — there are{" "}
-        <strong>4 accounts that fit this high-risk pattern</strong> that aren't
-        showing major usage drops <strong>yet</strong>:
+      <div>
+        <strong>4 more accounts fit this high-risk pattern</strong> that aren't
+        showing drops <strong>yet</strong>:
       </div>
     </>
   ),
@@ -240,77 +201,50 @@ const BOT4_RESPONSE: BotResponseContent = {
   tableRows: BOT4_TABLE_ROWS,
   analysisText: (
     <>
-      They look healthy on the surface but match the profile of accounts that
-      typically decline within 30-60 days. Combined with the original 4, that's{" "}
-      <strong>$1.5M in ARR</strong> across 8 at-risk accounts — not $835K.
-      <br />
-      <br />
-      I'd get the CS team on Retool and Vercel this week before they follow the
-      same trajectory as Rivian.
+      They match the profile of accounts that decline within 30-60 days.
+      Combined with the original 4, that's <strong>$1.5M in ARR</strong> across
+      8 at-risk accounts — not just $835K.
     </>
   ),
+  images: [staticFile("churn_risk_chart.png")],
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
 
-// ─── Bot response #5 — CSV export ───────────────────────────────────────────
+// ─── Bot response #5 — Combined export + report ─────────────────────────────
 
 const BOT5_TOOLS: ToolCall[] = [
   { name: "Build at-risk account export", timing: "412ms" },
-  { name: "Upload CSV file", timing: "856ms" },
+  { name: "Generate report charts", timing: "1,245ms" },
+  { name: "Compile spreadsheet and PDF", timing: "1,201ms" },
   { name: "Verify data integrity", timing: "323ms" },
 ];
 
 const BOT5_RESPONSE: BotResponseContent = {
-  statsText: "3 tools executed",
-  statsSucceeded: "3 succeeded",
-  statsTime: "1,591ms total",
+  statsText: "4 tools executed",
+  statsSucceeded: "4 succeeded",
+  statsTime: "3,181ms total",
   responseText: (
     <>
-      Here's the full export — 10 at-risk accounts with usage data, ticket
-      history, integration count, and a churn risk score. I ranked them by risk
-      so your CS team can prioritize outreach.
+      Here's everything — full at-risk account list ranked by churn risk score,
+      plus a 4-page report with executive summary, charts, and recommendations
+      for leadership.
       <br />
       <br />
-      Top priority: Rivian (94), Plaid (89), and Brex (82) are all critical. The
-      4 newly flagged accounts (Retool, Mercury, Vercel, Linear) are in the
-      55-68 range — not on fire yet but headed that direction.
+      Top priority: Rivian (94), Plaid (89), and Brex (82) are critical. The 4
+      newly flagged accounts are in the 55-68 range — not on fire yet but
+      headed that direction.
     </>
   ),
   attachments: [
     {
       type: "file",
-      name: "Launchpad_At_Risk_Accounts_Q2_Renewals.csv",
+      name: "Q2_Renewal_Risk_Accounts.xlsx",
       description: "10 rows × 13 columns — ranked by churn risk score",
     },
-  ],
-  source: "Datost Prod (postgresql)",
-  timestamp: "Just now",
-};
-
-// ─── Bot response #6 — PDF report ───────────────────────────────────────────
-
-const BOT6_TOOLS: ToolCall[] = [
-  { name: "Generate charts for report", timing: "1,245ms" },
-  { name: "Build Typst report template", timing: "892ms" },
-  { name: "Compile PDF", timing: "345ms" },
-];
-
-const BOT6_RESPONSE: BotResponseContent = {
-  statsText: "5 tools executed",
-  statsSucceeded: "5 succeeded",
-  statsTime: "2,988ms total",
-  responseText: (
-    <>
-      Here's the full report — executive summary, at-risk account breakdown,
-      usage trend charts, support ticket analysis, and the churn pattern
-      findings. Charts are included so it's ready to share as-is.
-    </>
-  ),
-  attachments: [
     {
       type: "file",
-      name: "Launchpad_Q2_Renewal_Risk_Report.pdf",
+      name: "Q2_Renewal_Risk_Report.pdf",
       description:
         "4-page report — executive summary, charts, analysis, recommendations",
     },
@@ -319,15 +253,15 @@ const BOT6_RESPONSE: BotResponseContent = {
   timestamp: "Just now",
 };
 
-// ─── Bot response #7 — Dashboard ────────────────────────────────────────────
+// ─── Bot response #6 — Dashboard ────────────────────────────────────────────
 
-const BOT7_TOOLS: ToolCall[] = [
+const BOT6_TOOLS: ToolCall[] = [
   { name: "Create dashboard", timing: "412ms" },
   { name: "Save dashboard widgets", timing: "1,876ms" },
   { name: "Verify KPIs render", timing: "521ms" },
 ];
 
-const BOT7_RESPONSE: BotResponseContent = {
+const BOT6_RESPONSE: BotResponseContent = {
   statsText: "3 tools executed",
   statsSucceeded: "3 succeeded",
   statsTime: "2,809ms total",
@@ -351,6 +285,13 @@ const BOT7_RESPONSE: BotResponseContent = {
   timestamp: "Just now",
 };
 
+// ─── Tracker for camera to follow latest thread content ──────────────────────
+
+const LatestMessageTracker: React.FC = () => {
+  const ref = useCursorTarget(LATEST_MSG_TARGET);
+  return <div ref={ref} style={{ height: 0 }} />;
+};
+
 // ─── Main layout ─────────────────────────────────────────────────────────────
 
 export const SlackLayout: React.FC = () => {
@@ -368,136 +309,99 @@ export const SlackLayout: React.FC = () => {
   // ── Scene 3: Jason's @Datost message streams ──────────────────────────
   const jason2AppearFrame = messageSentFrame + 25;
 
-  // ── Scene 4: Bot response #1 ──────────────────────────────────────────
+  // ── Bot #1 (straight to tools) ────────────────────────────────────────
   const bot1Start = 450;
-  const bot1Phase2 = 490;
-  const bot1Cycle1 = 575;
-  const bot1ToolDone = [610, 635];
-  const bot1Cycle2 = 655;
-  const bot1Final = 700;
+  const bot1Cycle1 = 460;
+  const bot1ToolDone = [495, 520];
+  const bot1Cycle2 = 540;
+  const bot1Final = 580;
 
-  // ── Scene 5: Maceo reacts ─────────────────────────────────────────────
-  const maceoTyping1Start = 850;
-  const maceoMsg1Frame = 910;
+  // ── Maceo reacts (no typing) ────────────────────────────────────────
+  const maceoMsg1Frame = 730;
 
-  // ── Scene 6: Jason reacts to Plaid ────────────────────────────────────
-  const jasonTyping2Start = 960;
-  const jasonMsg2Frame = 1010;
+  // ── Maceo asks for trends (no typing) ─────────────────────────────────
+  const maceoMsg2Frame = 780;
 
-  // ── Scene 7: Maceo asks for usage trends (@Datost) ────────────────────
-  const maceoTyping2Start = 1050;
-  const maceoMsg2Frame = 1100;
+  // ── Bot #2 ────────────────────────────────────────────────────────────
+  const bot2Start = 830;
+  const bot2Cycle1 = 840;
+  const bot2ToolDone = [875, 900];
+  const bot2Cycle2 = 920;
+  const bot2Final = 960;
 
-  // ── Scene 8: Bot response #2 (usage trends) ──────────────────────────
-  const bot2Start = 1150;
-  const bot2Phase2 = 1190;
-  const bot2Cycle1 = 1260;
-  const bot2ToolDone = [1300, 1330];
-  const bot2Cycle2 = 1350;
-  const bot2Final = 1400;
+  // ── Maceo asks about support tickets (no typing) ──────────────────────
+  const maceoMsg3Frame = 1110;
 
-  // ── Scene 9: Jason comments on cliff ──────────────────────────────────
-  const jasonTyping3Start = 1560;
-  const jasonMsg3Frame = 1610;
+  // ── Bot #3 ────────────────────────────────────────────────────────────
+  const bot3Start = 1160;
+  const bot3Cycle1 = 1170;
+  const bot3ToolDone = [1205, 1235];
+  const bot3Cycle2 = 1255;
+  const bot3Final = 1295;
 
-  // ── Scene 10: Maceo agrees ────────────────────────────────────────────
-  const maceoTyping3Start = 1640;
-  const maceoMsg3Frame = 1690;
+  // ── Maceo pivots to bigger picture (no typing) ────────────────────────
+  const maceoMsg4Frame = 1445;
 
-  // ── Scene 11: Maceo asks about support tickets (@Datost) ──────────────
-  const maceoTyping4Start = 1730;
-  const maceoMsg4Frame = 1780;
+  // ── Jason asks for churn analysis (no typing) ─────────────────────────
+  const jasonMsg1Frame = 1495;
 
-  // ── Scene 12: Bot response #3 (support tickets) ───────────────────────
-  const bot3Start = 1830;
-  const bot3Phase2 = 1870;
-  const bot3Cycle1 = 1940;
-  const bot3ToolDone = [1975, 2005];
-  const bot3Cycle2 = 2025;
-  const bot3Final = 2075;
+  // ── Bot #4 (3 tools) ─────────────────────────────────────────────────
+  const bot4Start = 1545;
+  const bot4Cycle1 = 1555;
+  const bot4ToolDone = [1595, 1635, 1665];
+  const bot4Cycle2 = 1690;
+  const bot4Final = 1735;
 
-  // ── Scene 13: Jason reacts to SSO ─────────────────────────────────────
-  const jasonTyping4Start = 2230;
-  const jasonMsg4Frame = 2280;
+  // ── Jason wants action (no typing) ────────────────────────────────────
+  const jasonMsg2Frame = 1885;
 
-  // ── Scene 14: Maceo wants broader view ────────────────────────────────
-  const maceoTyping5Start = 2310;
-  const maceoMsg5Frame = 2360;
+  // ── Maceo asks for combined export + report (no typing) ───────────────
+  const maceoMsg5Frame = 1935;
 
-  // ── Scene 15: Jason asks for churn analysis (@Datost) ─────────────────
-  const jasonTyping5Start = 2400;
-  const jasonMsg5Frame = 2450;
+  // ── Bot #5 (4 tools) ─────────────────────────────────────────────────
+  const bot5Start = 1985;
+  const bot5Cycle1 = 1995;
+  const bot5ToolDone = [2035, 2070, 2100, 2125];
+  const bot5Cycle2 = 2150;
+  const bot5Final = 2195;
 
-  // ── Scene 16: Bot response #4 (churn analysis — 3 tools) ─────────────
-  const bot4Start = 2500;
-  const bot4Phase2 = 2540;
-  const bot4Cycle1 = 2620;
-  const bot4ToolDone = [2660, 2700, 2730];
-  const bot4Cycle2 = 2755;
-  const bot4Final = 2810;
+  // ── Jason wants ongoing monitoring (no typing) ────────────────────────
+  const jasonMsg3Frame = 2325;
 
-  // ── Scene 17: Maceo reacts ────────────────────────────────────────────
-  const maceoTyping6Start = 2980;
-  const maceoMsg6Frame = 3030;
+  // ── Maceo asks for dashboard (no typing) ──────────────────────────────
+  const maceoMsg6Frame = 2375;
 
-  // ── Scene 18: Jason responds ──────────────────────────────────────────
-  const jasonTyping6Start = 3060;
-  const jasonMsg6Frame = 3110;
+  // ── Bot #6 (3 tools) ─────────────────────────────────────────────────
+  const bot6Start = 2425;
+  const bot6Cycle1 = 2435;
+  const bot6ToolDone = [2470, 2505, 2535];
+  const bot6Cycle2 = 2560;
+  const bot6Final = 2605;
 
-  // ── Scene 19: Maceo asks for CSV export (@Datost) ─────────────────────
-  const maceoTyping7Start = 3150;
-  const maceoMsg7Frame = 3200;
+  // ── Maceo closing (no typing) ─────────────────────────────────────────
+  const maceoMsg7Frame = 2705;
 
-  // ── Scene 20: Bot response #5 (CSV export — 3 tools) ─────────────────
-  const bot5Start = 3250;
-  const bot5Phase2 = 3290;
-  const bot5Cycle1 = 3360;
-  const bot5ToolDone = [3395, 3425, 3450];
-  const bot5Cycle2 = 3475;
-  const bot5Final = 3525;
-
-  // ── Scene 21: Jason asks for report ───────────────────────────────────
-  const jasonTyping7Start = 3630;
-  const jasonMsg7Frame = 3680;
-
-  // ── Scene 22: Maceo asks Datost to create report (@Datost) ────────────
-  const maceoTyping8Start = 3720;
-  const maceoMsg8Frame = 3770;
-
-  // ── Scene 23: Bot response #6 (PDF report — 5 tools) ─────────────────
-  const bot6Start = 3820;
-  const bot6Phase2 = 3860;
-  const bot6Cycle1 = 3940;
-  const bot6ToolDone = [3975, 4010, 4040];
-  const bot6Cycle2 = 4065;
-  const bot6Final = 4115;
-
-  // ── Scene 24: Jason's observation ─────────────────────────────────────
-  const jasonTyping8Start = 4210;
-  const jasonMsg8Frame = 4260;
-
-  // ── Scene 25: Maceo asks for dashboard (@Datost) ──────────────────────
-  const maceoTyping9Start = 4300;
-  const maceoMsg9Frame = 4350;
-
-  // ── Scene 26: Bot response #7 (dashboard — 3 tools) ──────────────────
-  const bot7Start = 4400;
-  const bot7Phase2 = 4440;
-  const bot7Cycle1 = 4510;
-  const bot7ToolDone = [4545, 4580, 4610];
-  const bot7Cycle2 = 4635;
-  const bot7Final = 4685;
-
-  // ── Scene 27: Maceo's closing message ─────────────────────────────────
-  const maceoTyping10Start = 4780;
-  const maceoMsg10Frame = 4830;
-
-  // ── Reply box typing text for additional sessions ──────────────────────
-  const MACEO_DATOST_TEXT2 =
-    "show me a weekly usage trend for our top 6 at-risk accounts over the last 90 days. include a chart";
-
-  const MACEO_DATOST_TEXT3 =
-    "any support tickets or NPS responses from Rivian and Plaid in the last 60 days? what are they about?";
+  // ── Thread reply milestones (for channel message indicator) ──────────
+  const threadReplies: ThreadReply[] = [
+    { frame: messageSentFrame, participant: "jason" },
+    { frame: jason2AppearFrame, participant: "jason" },
+    { frame: bot1Start, participant: "bot" },
+    { frame: maceoMsg1Frame, participant: "maceo" },
+    { frame: maceoMsg2Frame, participant: "maceo" },
+    { frame: bot2Start, participant: "bot" },
+    { frame: maceoMsg3Frame, participant: "maceo" },
+    { frame: bot3Start, participant: "bot" },
+    { frame: maceoMsg4Frame, participant: "maceo" },
+    { frame: jasonMsg1Frame, participant: "jason" },
+    { frame: bot4Start, participant: "bot" },
+    { frame: jasonMsg2Frame, participant: "jason" },
+    { frame: maceoMsg5Frame, participant: "maceo" },
+    { frame: bot5Start, participant: "bot" },
+    { frame: jasonMsg3Frame, participant: "jason" },
+    { frame: maceoMsg6Frame, participant: "maceo" },
+    { frame: bot6Start, participant: "bot" },
+    { frame: maceoMsg7Frame, participant: "maceo" },
+  ];
 
   return (
     <CursorTargetProvider>
@@ -516,7 +420,7 @@ export const SlackLayout: React.FC = () => {
         <TitleBar />
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <Sidebar />
-          <ChatArea />
+          <ChatArea threadReplies={threadReplies} />
           <ThreadPanel
             openFrame={threadOpenFrame}
             replyTyping={[
@@ -525,18 +429,6 @@ export const SlackLayout: React.FC = () => {
                 startFrame: typingStartFrame,
                 speed: 0.7,
                 clearFrame: messageSentFrame,
-              },
-              {
-                text: MACEO_DATOST_TEXT2,
-                startFrame: maceoTyping2Start,
-                speed: 0.5,
-                clearFrame: maceoMsg2Frame,
-              },
-              {
-                text: MACEO_DATOST_TEXT3,
-                startFrame: maceoTyping4Start,
-                speed: 0.5,
-                clearFrame: maceoMsg4Frame,
               },
             ]}
             threadMessages={
@@ -580,7 +472,6 @@ export const SlackLayout: React.FC = () => {
                 {/* ── Bot response #1 ──────────────────────────────── */}
                 <DatostBotMessage
                   startFrame={bot1Start}
-                  phase2Frame={bot1Phase2}
                   cycle1Frame={bot1Cycle1}
                   toolDoneFrames={bot1ToolDone}
                   cycle2Frame={bot1Cycle2}
@@ -589,12 +480,7 @@ export const SlackLayout: React.FC = () => {
                   response={BOT1_RESPONSE}
                 />
 
-                {/* ── Maceo: "damn, Rivian is down 72%!" ───────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping1Start}
-                  endFrame={maceoMsg1Frame}
-                />
+                {/* ── Maceo reacts ────────────────────────────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
@@ -605,30 +491,14 @@ export const SlackLayout: React.FC = () => {
                   damn, Rivian is down 72%? they're one of our biggest accounts
                 </SlackMessage>
 
-                {/* ── Jason: "and plaid too??" ──────────────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping2Start}
-                  endFrame={jasonMsg2Frame}
-                />
-                <SlackMessage
-                  author={JASON.author}
-                  avatarColor={JASON.color}
-                  avatarInitial={JASON.initial}
-                  timestamp="Just now"
-                  startFrame={jasonMsg2Frame}
-                >
-                  and plaid too?? are they just seasonal or is something
-                  actually wrong
-                </SlackMessage>
-
-                {/* ── Maceo asks for usage trends (@Datost) ────────── */}
+                {/* ── Maceo asks for trends ──────────────────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
                   startFrame={maceoMsg2Frame}
+                  continuation
                 >
                   <Mention>Datost</Mention> show me a weekly usage trend for
                   our top 6 at-risk accounts over the last 90 days. include a
@@ -638,7 +508,6 @@ export const SlackLayout: React.FC = () => {
                 {/* ── Bot response #2 (usage trends) ───────────────── */}
                 <DatostBotMessage
                   startFrame={bot2Start}
-                  phase2Frame={bot2Phase2}
                   cycle1Frame={bot2Cycle1}
                   toolDoneFrames={bot2ToolDone}
                   cycle2Frame={bot2Cycle2}
@@ -647,46 +516,13 @@ export const SlackLayout: React.FC = () => {
                   response={BOT2_RESPONSE}
                 />
 
-                {/* ── Jason: cliff comment ──────────────────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping3Start}
-                  endFrame={jasonMsg3Frame}
-                />
-                <SlackMessage
-                  author={JASON.author}
-                  avatarColor={JASON.color}
-                  avatarInitial={JASON.initial}
-                  timestamp="Just now"
-                  startFrame={jasonMsg3Frame}
-                >
-                  that rivian drop is a cliff not a trend, something happened 6
-                  weeks ago
-                </SlackMessage>
-
-                {/* ── Maceo: agreed ─────────────────────────────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping3Start}
-                  endFrame={maceoMsg3Frame}
-                />
+                {/* ── Maceo asks about support tickets ─────────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
                   startFrame={maceoMsg3Frame}
-                >
-                  agreed. let me check if they've been complaining
-                </SlackMessage>
-
-                {/* ── Maceo asks about support tickets (@Datost) ───── */}
-                <SlackMessage
-                  author={MACEO.author}
-                  avatarColor={MACEO.color}
-                  avatarInitial={MACEO.initial}
-                  timestamp="Just now"
-                  startFrame={maceoMsg4Frame}
                 >
                   <Mention>Datost</Mention> any support tickets or NPS responses
                   from Rivian and Plaid in the last 60 days? what are they about?
@@ -695,7 +531,6 @@ export const SlackLayout: React.FC = () => {
                 {/* ── Bot response #3 (support tickets) ────────────── */}
                 <DatostBotMessage
                   startFrame={bot3Start}
-                  phase2Frame={bot3Phase2}
                   cycle1Frame={bot3Cycle1}
                   toolDoneFrames={bot3ToolDone}
                   cycle2Frame={bot3Cycle2}
@@ -704,52 +539,25 @@ export const SlackLayout: React.FC = () => {
                   response={BOT3_RESPONSE}
                 />
 
-                {/* ── Jason: SSO reaction ───────────────────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping4Start}
-                  endFrame={jasonMsg4Frame}
-                />
-                <SlackMessage
-                  author={JASON.author}
-                  avatarColor={JASON.color}
-                  avatarInitial={JASON.initial}
-                  timestamp="Just now"
-                  startFrame={jasonMsg4Frame}
-                >
-                  so rivian is literally churning because of a broken SSO
-                  integration, thats fixable
-                </SlackMessage>
-
-                {/* ── Maceo: broader view ───────────────────────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping5Start}
-                  endFrame={maceoMsg5Frame}
-                />
+                {/* ── Maceo: broader view ─────────────────────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
-                  startFrame={maceoMsg5Frame}
+                  startFrame={maceoMsg4Frame}
                 >
-                  yeah but I want to know if this is bigger than just these two.
-                  are there other accounts we're missing?
+                  ok so rivian is fixable but plaid is a product gap. are there
+                  other accounts we're missing?
                 </SlackMessage>
 
-                {/* ── Jason asks for churn analysis (@Datost) ──────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping5Start}
-                  endFrame={jasonMsg5Frame}
-                />
+                {/* ── Jason asks for churn analysis ─────────────────── */}
                 <SlackMessage
                   author={JASON.author}
                   avatarColor={JASON.color}
                   avatarInitial={JASON.initial}
                   timestamp="Just now"
-                  startFrame={jasonMsg5Frame}
+                  startFrame={jasonMsg1Frame}
                 >
                   <Mention>Datost</Mention> run an analysis across all renewal
                   accounts, is there a correlation between feature adoption,
@@ -760,7 +568,6 @@ export const SlackLayout: React.FC = () => {
                 {/* ── Bot response #4 (churn analysis) ─────────────── */}
                 <DatostBotMessage
                   startFrame={bot4Start}
-                  phase2Frame={bot4Phase2}
                   cycle1Frame={bot4Cycle1}
                   toolDoneFrames={bot4ToolDone}
                   cycle2Frame={bot4Cycle2}
@@ -769,62 +576,34 @@ export const SlackLayout: React.FC = () => {
                   response={BOT4_RESPONSE}
                 />
 
-                {/* ── Maceo: 4 more at risk? ───────────────────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping6Start}
-                  endFrame={maceoMsg6Frame}
-                />
-                <SlackMessage
-                  author={MACEO.author}
-                  avatarColor={MACEO.color}
-                  avatarInitial={MACEO.initial}
-                  timestamp="Just now"
-                  startFrame={maceoMsg6Frame}
-                >
-                  wait so there are 4 more accounts at risk that we didn't even
-                  know about?
-                </SlackMessage>
-
                 {/* ── Jason: get to CS team ─────────────────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping6Start}
-                  endFrame={jasonMsg6Frame}
-                />
                 <SlackMessage
                   author={JASON.author}
                   avatarColor={JASON.color}
                   avatarInitial={JASON.initial}
                   timestamp="Just now"
-                  startFrame={jasonMsg6Frame}
+                  startFrame={jasonMsg2Frame}
                 >
-                  yeah we need to get this to the cs team today, can you pull
+                  we need to get this to the cs team today, can you pull
                   everything together
                 </SlackMessage>
 
-                {/* ── Maceo asks for CSV export (@Datost) ──────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping7Start}
-                  endFrame={maceoMsg7Frame}
-                />
+                {/* ── Maceo asks for combined export + report ────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
-                  startFrame={maceoMsg7Frame}
+                  startFrame={maceoMsg5Frame}
                 >
                   <Mention>Datost</Mention> export the full at-risk account list
-                  with usage trends, support ticket summaries, and churn risk
-                  score as a csv
+                  as a spreadsheet and put together a report with the analysis,
+                  charts, and recommendations for leadership
                 </SlackMessage>
 
-                {/* ── Bot response #5 (CSV export) ─────────────────── */}
+                {/* ── Bot response #5 (Excel + PDF) ──────────────────── */}
                 <DatostBotMessage
                   startFrame={bot5Start}
-                  phase2Frame={bot5Phase2}
                   cycle1Frame={bot5Cycle1}
                   toolDoneFrames={bot5ToolDone}
                   cycle2Frame={bot5Cycle2}
@@ -833,120 +612,56 @@ export const SlackLayout: React.FC = () => {
                   response={BOT5_RESPONSE}
                 />
 
-                {/* ── Jason: asks for report ────────────────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping7Start}
-                  endFrame={jasonMsg7Frame}
-                />
-                <SlackMessage
-                  author={JASON.author}
-                  avatarColor={JASON.color}
-                  avatarInitial={JASON.initial}
-                  timestamp="Just now"
-                  startFrame={jasonMsg7Frame}
-                >
-                  also can you put together a report with the analysis and
-                  findings, i want to send to leadership with context not just a
-                  spreadsheet
-                </SlackMessage>
-
-                {/* ── Maceo asks for report creation (@Datost) ─────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping8Start}
-                  endFrame={maceoMsg8Frame}
-                />
-                <SlackMessage
-                  author={MACEO.author}
-                  avatarColor={MACEO.color}
-                  avatarInitial={MACEO.initial}
-                  timestamp="Just now"
-                  startFrame={maceoMsg8Frame}
-                >
-                  <Mention>Datost</Mention> create a report on our renewal risk,
-                  include the at-risk accounts, usage trends, support ticket
-                  findings, and the churn pattern analysis with charts
-                </SlackMessage>
-
-                {/* ── Bot response #6 (PDF report) ─────────────────── */}
-                <DatostBotMessage
-                  startFrame={bot6Start}
-                  phase2Frame={bot6Phase2}
-                  cycle1Frame={bot6Cycle1}
-                  toolDoneFrames={bot6ToolDone}
-                  cycle2Frame={bot6Cycle2}
-                  finalResponseFrame={bot6Final}
-                  tools={BOT6_TOOLS}
-                  additionalToolCount={2}
-                  response={BOT6_RESPONSE}
-                />
-
                 {/* ── Jason: can't do this every quarter ────────────── */}
-                <TypingIndicator
-                  name={JASON.author}
-                  startFrame={jasonTyping8Start}
-                  endFrame={jasonMsg8Frame}
-                />
                 <SlackMessage
                   author={JASON.author}
                   avatarColor={JASON.color}
                   avatarInitial={JASON.initial}
                   timestamp="Just now"
-                  startFrame={jasonMsg8Frame}
+                  startFrame={jasonMsg3Frame}
                 >
                   this is great, but can't do this firedrill every quarter, we
                   need something the cs team can check on their own
                 </SlackMessage>
 
-                {/* ── Maceo asks for dashboard (@Datost) ───────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping9Start}
-                  endFrame={maceoMsg9Frame}
-                />
+                {/* ── Maceo asks for dashboard ──────────────────────── */}
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
-                  startFrame={maceoMsg9Frame}
+                  startFrame={maceoMsg6Frame}
                 >
                   <Mention>Datost</Mention> build a dashboard that tracks
                   account health, usage trends, support ticket volume, and
                   renewal dates. flag anything that looks at risk
                 </SlackMessage>
 
-                {/* ── Bot response #7 (dashboard) ──────────────────── */}
+                {/* ── Bot response #6 (dashboard) ──────────────────── */}
                 <DatostBotMessage
-                  startFrame={bot7Start}
-                  phase2Frame={bot7Phase2}
-                  cycle1Frame={bot7Cycle1}
-                  toolDoneFrames={bot7ToolDone}
-                  cycle2Frame={bot7Cycle2}
-                  finalResponseFrame={bot7Final}
-                  tools={BOT7_TOOLS}
-                  response={BOT7_RESPONSE}
+                  startFrame={bot6Start}
+                  cycle1Frame={bot6Cycle1}
+                  toolDoneFrames={bot6ToolDone}
+                  cycle2Frame={bot6Cycle2}
+                  finalResponseFrame={bot6Final}
+                  tools={BOT6_TOOLS}
+                  response={BOT6_RESPONSE}
                 />
 
                 {/* ── Maceo: closing message ────────────────────────── */}
-                <TypingIndicator
-                  name={MACEO.author}
-                  startFrame={maceoTyping10Start}
-                  endFrame={maceoMsg10Frame}
-                />
                 <SlackMessage
                   author={MACEO.author}
                   avatarColor={MACEO.color}
                   avatarInitial={MACEO.initial}
                   timestamp="Just now"
-                  startFrame={maceoMsg10Frame}
+                  startFrame={maceoMsg7Frame}
                 >
                   done, dropping this in #cs-renewals. we just went from "I have
                   a bad feeling about some accounts" to a full churn prevention
                   system in one thread
                 </SlackMessage>
 
+                <LatestMessageTracker />
               </>
             }
           >
