@@ -87,6 +87,8 @@ export const MyComposition = () => {
             "GitHub",
             "Coda",
             "Notion",
+            "Any MCP server",
+            "+ more",
           ]}
           durationInFrames={468}
         />
