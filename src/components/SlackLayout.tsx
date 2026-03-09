@@ -1,4 +1,5 @@
 import React from "react";
+import { useCurrentFrame, interpolate } from "remotion";
 import { TitleBar } from "./TitleBar";
 import { Sidebar } from "./Sidebar";
 import { ChatArea } from "./ChatArea";
@@ -7,12 +8,15 @@ import { Cursor } from "./Cursor";
 import { SlackMessage, Mention } from "./SlackMessage";
 import { CursorTargetProvider } from "./CursorTargetContext";
 import { StreamingMessageContent } from "./StreamingMessageContent";
+import { DatostBotMessage } from "./DatostBotMessage";
+import { TypingIndicator } from "./TypingIndicator";
 
 const JASON_TEXT =
   "hmm thats not great, quiet accounts right before renewal is normally bad news, do we know how active they usually are";
 
-
 export const SlackLayout: React.FC = () => {
+  const frame = useCurrentFrame();
+
   const threadOpenFrame = 142;
 
   // Cursor clicks reply box, then disappears
@@ -21,13 +25,36 @@ export const SlackLayout: React.FC = () => {
 
   // Typing starts after cursor disappears
   const typingStartFrame = 185;
-  // At ~0.7 avg frames/char, 113 chars ≈ ~90 frames
-  const typingEndFrame = typingStartFrame + Math.ceil(JASON_TEXT.length * 0.85) + 10;
+  // At ~0.7 avg frames/char, 113 chars ~= ~90 frames
+  const typingEndFrame =
+    typingStartFrame + Math.ceil(JASON_TEXT.length * 0.85) + 10;
   // Message "sends" and appears
   const messageSentFrame = typingEndFrame + 5;
 
   // Jason's second message (continuation) appears shortly after
   const jason2AppearFrame = messageSentFrame + 25;
+
+  // --- Bot response timing ---
+  // Streaming message finishes ~107 frames after it starts
+  const botAppearFrame = 450;
+  const botPhase2Frame = 490;
+  const botCycle1Frame = 575;
+  const botTool1DoneFrame = 610;
+  const botTool2DoneFrame = 635;
+  const botCycle2Frame = 655;
+  const botFinalFrame = 700;
+
+  // Maceo's follow-up in thread
+  const maceoThreadTypingFrame = 850;
+  const maceoFollowupFrame = 910;
+
+  // Thread scroll: smoothly scroll messages up once bot final response appears
+  const scrollOffset = interpolate(
+    frame,
+    [botFinalFrame, botFinalFrame + 45, maceoFollowupFrame, maceoFollowupFrame + 30],
+    [0, 130, 130, 200],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
 
   return (
     <CursorTargetProvider>
@@ -55,6 +82,7 @@ export const SlackLayout: React.FC = () => {
               speed: 0.7,
               clearFrame: messageSentFrame,
             }}
+            scrollOffset={scrollOffset}
             threadMessages={
               <>
                 <SlackMessage
@@ -88,6 +116,35 @@ export const SlackLayout: React.FC = () => {
                       },
                     ]}
                   />
+                </SlackMessage>
+
+                {/* Datost bot response */}
+                <DatostBotMessage
+                  startFrame={botAppearFrame}
+                  phase2Frame={botPhase2Frame}
+                  cycle1Frame={botCycle1Frame}
+                  tool1DoneFrame={botTool1DoneFrame}
+                  tool2DoneFrame={botTool2DoneFrame}
+                  cycle2Frame={botCycle2Frame}
+                  finalResponseFrame={botFinalFrame}
+                />
+
+                {/* Maceo typing indicator in thread */}
+                <TypingIndicator
+                  name="Maceo"
+                  startFrame={maceoThreadTypingFrame}
+                  endFrame={maceoFollowupFrame}
+                />
+
+                {/* Maceo's follow-up */}
+                <SlackMessage
+                  author="Maceo"
+                  avatarColor="#4a154b"
+                  avatarInitial="M"
+                  timestamp="9:44 PM"
+                  startFrame={maceoFollowupFrame}
+                >
+                  damn, Rivian is down 72%! they're one of our biggest accounts
                 </SlackMessage>
               </>
             }

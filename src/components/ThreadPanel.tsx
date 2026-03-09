@@ -21,6 +21,8 @@ interface ThreadPanelProps {
     speed?: number;
     clearFrame: number;
   };
+  /** Pixel offset to scroll messages up (animated externally) */
+  scrollOffset?: number;
 }
 
 const FormatBtn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -44,6 +46,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   children,
   threadMessages,
   replyTyping,
+  scrollOffset = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -159,8 +162,15 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             overflow: "hidden",
           }}
         >
-          {children}
-          {threadMessages}
+          <div
+            style={{
+              transform: `translateY(-${scrollOffset}px)`,
+              transition: "transform 0.1s ease-out",
+            }}
+          >
+            {children}
+            {threadMessages}
+          </div>
         </div>
 
         {/* Reply input */}
