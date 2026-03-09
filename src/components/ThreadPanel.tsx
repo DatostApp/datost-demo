@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useLayoutEffect, useState } from "react";
 import {
   interpolate,
   useCurrentFrame,
@@ -8,21 +8,21 @@ import {
 import { useCursorTarget } from "./CursorTargetContext";
 import { TypingTextBox } from "./TypingTextBox";
 
+interface ReplyTypingSession {
+  text: string;
+  startFrame: number;
+  speed?: number;
+  clearFrame: number;
+}
+
 interface ThreadPanelProps {
   /** Frame when the panel starts opening */
   openFrame: number;
   children?: React.ReactNode;
   /** Thread reply messages rendered after the OP */
   threadMessages?: React.ReactNode;
-  /** Typing in the reply box config */
-  replyTyping?: {
-    text: string;
-    startFrame: number;
-    speed?: number;
-    clearFrame: number;
-  };
-  /** Pixel offset to scroll messages up (animated externally) */
-  scrollOffset?: number;
+  /** Typing in the reply box config — single session or array of sessions */
+  replyTyping?: ReplyTypingSession | ReplyTypingSession[];
 }
 
 const FormatBtn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -46,11 +46,25 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   children,
   threadMessages,
   replyTyping,
-  scrollOffset = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const replyBoxRef = useCursorTarget("threadReplyBox");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  // Measure content vs container and auto-scroll to keep bottom visible.
+  // Intentionally runs every render (every frame) to track dynamic content.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerH = containerRef.current.clientHeight;
+      const contentH = contentRef.current.scrollHeight;
+      const overflow = Math.max(0, contentH - containerH);
+      setScrollOffset(overflow);
+    }
+  });
 
   if (frame < openFrame) return null;
 
@@ -69,9 +83,20 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
     extrapolateLeft: "clamp",
   });
 
-  // Is the reply box "focused" (after cursor clicks it)
-  const isReplyFocused =
-    replyTyping !== undefined && frame >= replyTyping.startFrame - 10;
+  // Normalize replyTyping to array
+  const typingSessions: ReplyTypingSession[] = replyTyping
+    ? Array.isArray(replyTyping)
+      ? replyTyping
+      : [replyTyping]
+    : [];
+
+  // Find the active typing session (the one currently in progress)
+  const activeSession = typingSessions.find(
+    (s) => frame >= s.startFrame - 10 && frame < s.clearFrame + 5,
+  );
+
+  // Is the reply box "focused"
+  const isReplyFocused = activeSession !== undefined && frame >= activeSession.startFrame - 10;
 
   // Show placeholder only when not focused
   const showPlaceholder = !isReplyFocused;
@@ -127,7 +152,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 whiteSpace: "nowrap",
               }}
             >
-              #all-datost
+              #cs-renewals
             </span>
             <div
               style={{
@@ -154,6 +179,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
 
         {/* Thread messages */}
         <div
+          ref={containerRef}
           style={{
             flex: 1,
             padding: "12px 16px",
@@ -163,13 +189,14 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
           }}
         >
           <div
+            ref={contentRef}
             style={{
               transform: `translateY(-${scrollOffset}px)`,
-              transition: "transform 0.1s ease-out",
             }}
           >
             {children}
             {threadMessages}
+            <div style={{ minHeight: 16, flexShrink: 0 }} />
           </div>
         </div>
 
@@ -252,12 +279,13 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               {showPlaceholder ? (
                 <span style={{ color: "#7c7e83" }}>Reply...</span>
               ) : (
-                replyTyping && (
+                activeSession && (
                   <TypingTextBox
-                    text={replyTyping.text}
-                    startFrame={replyTyping.startFrame}
-                    speed={replyTyping.speed}
-                    clearFrame={replyTyping.clearFrame}
+                    key={activeSession.startFrame}
+                    text={activeSession.text}
+                    startFrame={activeSession.startFrame}
+                    speed={activeSession.speed}
+                    clearFrame={activeSession.clearFrame}
                   />
                 )
               )}

@@ -277,8 +277,8 @@ export const Sidebar: React.FC = () => {
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
           <SectionHeader label="Channels" />
           <ChannelItem name="general" />
-          <ChannelItem name="all-datost" active />
-          <ChannelItem name="new-channel" />
+          <ChannelItem name="cs-renewals" active />
+          <ChannelItem name="all-datost" />
           <ChannelItem name="social" />
 
           <SectionHeader label="Engineering" />

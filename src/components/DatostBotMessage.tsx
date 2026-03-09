@@ -27,6 +27,13 @@ export interface ToolCall {
   timing?: string;
 }
 
+export interface Attachment {
+  type: "file" | "link";
+  name: string;
+  description?: string;
+  url?: string;
+}
+
 export interface BotResponseContent {
   /** Stats line, e.g. "2 tools executed" */
   statsText: string;
@@ -37,8 +44,10 @@ export interface BotResponseContent {
   /** Table columns and rows (optional — omit for no table) */
   tableColumns?: TableColumn[];
   tableRows?: TableRow[];
-  /** Analysis paragraph below the table */
-  analysisText: React.ReactNode;
+  /** Analysis paragraph below the table (optional) */
+  analysisText?: React.ReactNode;
+  /** Optional file/link attachments */
+  attachments?: Attachment[];
   /** Data source label */
   source: string;
   /** Timestamp shown on the final response */
@@ -50,8 +59,8 @@ export interface DatostBotMessageProps {
   startFrame: number;
   phase2Frame: number;
   cycle1Frame: number;
-  tool1DoneFrame: number;
-  tool2DoneFrame: number;
+  /** Per-tool done frames — one entry per tool */
+  toolDoneFrames: number[];
   cycle2Frame: number;
   finalResponseFrame: number;
 
@@ -66,6 +75,8 @@ export interface DatostBotMessageProps {
   phase2Emoji?: string;
   /** Tool calls shown during cycle phases */
   tools?: ToolCall[];
+  /** If tools list is truncated, show "and N more" */
+  additionalToolCount?: number;
   /** Final response content */
   response: BotResponseContent;
 }
@@ -203,12 +214,51 @@ const ActionButton: React.FC<{ children: React.ReactNode }> = ({
 
 // --- Main component ---
 
+const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
+  attachment,
+}) => (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "8px 12px",
+      border: "1px solid #35373b",
+      borderRadius: 8,
+      backgroundColor: "rgba(255,255,255,0.02)",
+      margin: "8px 0",
+    }}
+  >
+    <span style={{ fontSize: 18, flexShrink: 0 }}>
+      {attachment.type === "file" ? "📎" : "🔗"}
+    </span>
+    <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: attachment.type === "link" ? "#1d9bd1" : "#d1d2d3",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {attachment.name}
+      </div>
+      {attachment.description && (
+        <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
+          {attachment.description}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   startFrame,
   phase2Frame,
   cycle1Frame,
-  tool1DoneFrame,
-  tool2DoneFrame,
+  toolDoneFrames,
   cycle2Frame,
   finalResponseFrame,
   phase1Text = "Looking into that...",
@@ -216,6 +266,7 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   phase2Text = "Querying your data sources...",
   phase2Emoji = "🔄",
   tools = [],
+  additionalToolCount,
   response,
 }) => {
   const frame = useCurrentFrame();
@@ -291,17 +342,24 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           )}
 
           {/* Analysis */}
-          <div
-            style={{
-              fontSize: 14,
-              color: "#d1d2d3",
-              lineHeight: 1.5,
-              marginTop: 4,
-              marginBottom: 10,
-            }}
-          >
-            {response.analysisText}
-          </div>
+          {response.analysisText && (
+            <div
+              style={{
+                fontSize: 14,
+                color: "#d1d2d3",
+                lineHeight: 1.5,
+                marginTop: 4,
+                marginBottom: 10,
+              }}
+            >
+              {response.analysisText}
+            </div>
+          )}
+
+          {/* Attachments */}
+          {response.attachments?.map((att, i) => (
+            <AttachmentCard key={i} attachment={att} />
+          ))}
 
           {/* Sources */}
           <div style={{ fontSize: 11, color: "#9ea0a5", marginBottom: 3 }}>
@@ -371,6 +429,18 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               startFrame={0}
             />
           ))}
+          {additionalToolCount !== undefined && additionalToolCount > 0 && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "#7c7e83",
+                padding: "3px 0",
+                marginLeft: 19,
+              }}
+            >
+              and {additionalToolCount} more ✅
+            </div>
+          )}
         </div>
       );
     }
@@ -392,20 +462,33 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
             <span>🕐</span>
           </div>
           {tools.map((tool, i) => {
-            const toolDoneFrame =
-              i === 0 ? tool1DoneFrame : tool2DoneFrame;
+            const doneFrame = toolDoneFrames[i] ?? toolDoneFrames[toolDoneFrames.length - 1];
             const toolStartFrame =
-              i === 0 ? cycle1Frame + 5 : tool1DoneFrame + 8;
+              i === 0
+                ? cycle1Frame + 5
+                : (toolDoneFrames[i - 1] ?? cycle1Frame) + 8;
             return (
               <ToolItem
                 key={i}
                 text={tool.name}
-                done={frame >= toolDoneFrame}
-                timing={frame >= toolDoneFrame ? tool.timing : undefined}
+                done={frame >= doneFrame}
+                timing={frame >= doneFrame ? tool.timing : undefined}
                 startFrame={toolStartFrame}
               />
             );
           })}
+          {additionalToolCount !== undefined && additionalToolCount > 0 && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "#7c7e83",
+                padding: "3px 0",
+                marginLeft: 19,
+              }}
+            >
+              and {additionalToolCount} more...
+            </div>
+          )}
         </div>
       );
     }

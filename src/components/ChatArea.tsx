@@ -41,12 +41,12 @@ interface ChatAreaProps {
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({
-  channel = "all-datost",
+  channel = "cs-renewals",
   message,
   messageAuthor = "Maceo",
   messageAvatarColor = "#4a154b",
   messageAvatarInitial = "M",
-  messageTimestamp = "9:31 PM",
+  messageTimestamp = "2:42 PM",
   messageStartFrame = 60,
   typingName = "Maceo",
   typingStartFrame = 15,
