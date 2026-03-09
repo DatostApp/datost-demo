@@ -12,13 +12,16 @@ interface CursorProps {
   keyframes: CursorKeyframe[];
   /** Frame when a click happens (brief scale pulse) */
   clickFrame?: number;
+  /** Frame when cursor disappears */
+  hideFrame?: number;
 }
 
-export const Cursor: React.FC<CursorProps> = ({ keyframes, clickFrame }) => {
+export const Cursor: React.FC<CursorProps> = ({ keyframes, clickFrame, hideFrame }) => {
   const frame = useCurrentFrame();
   const getPosition = useCursorPositions();
 
   if (frame < keyframes[0].frame) return null;
+  if (hideFrame !== undefined && frame >= hideFrame) return null;
 
   // Resolve each keyframe to actual coordinates
   const resolved = keyframes.map((k) => {

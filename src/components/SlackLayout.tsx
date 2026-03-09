@@ -6,10 +6,28 @@ import { ThreadPanel } from "./ThreadPanel";
 import { Cursor } from "./Cursor";
 import { SlackMessage, Mention } from "./SlackMessage";
 import { CursorTargetProvider } from "./CursorTargetContext";
+import { StreamingMessageContent } from "./StreamingMessageContent";
+
+const JASON_TEXT =
+  "hmm thats not great, quiet accounts right before renewal is normally bad news, do we know how active they usually are";
+
 
 export const SlackLayout: React.FC = () => {
-  // Thread opens after cursor clicks the reply button
   const threadOpenFrame = 142;
+
+  // Cursor clicks reply box, then disappears
+  const cursorClickReplyBox = 172;
+  const cursorDisappearFrame = 178;
+
+  // Typing starts after cursor disappears
+  const typingStartFrame = 185;
+  // At ~0.7 avg frames/char, 113 chars ≈ ~90 frames
+  const typingEndFrame = typingStartFrame + Math.ceil(JASON_TEXT.length * 0.85) + 10;
+  // Message "sends" and appears
+  const messageSentFrame = typingEndFrame + 5;
+
+  // Jason's second message (continuation) appears shortly after
+  const jason2AppearFrame = messageSentFrame + 25;
 
   return (
     <CursorTargetProvider>
@@ -29,7 +47,51 @@ export const SlackLayout: React.FC = () => {
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <Sidebar />
           <ChatArea />
-          <ThreadPanel openFrame={threadOpenFrame}>
+          <ThreadPanel
+            openFrame={threadOpenFrame}
+            replyTyping={{
+              text: JASON_TEXT,
+              startFrame: typingStartFrame,
+              speed: 0.7,
+              clearFrame: messageSentFrame,
+            }}
+            threadMessages={
+              <>
+                <SlackMessage
+                  author="Jason"
+                  avatarColor="#2b5e3a"
+                  avatarInitial="J"
+                  timestamp="9:44 PM"
+                  startFrame={messageSentFrame}
+                >
+                  {JASON_TEXT}
+                </SlackMessage>
+                <SlackMessage
+                  author="Jason"
+                  avatarColor="#2b5e3a"
+                  avatarInitial="J"
+                  timestamp="9:44 PM"
+                  startFrame={jason2AppearFrame}
+                  continuation
+                  noAnimation
+                >
+                  <StreamingMessageContent
+                    startFrame={jason2AppearFrame}
+                    speed={0.7}
+                    spiderverseDuration={30}
+                    segments={[
+                      { type: "mention", content: "Datost" },
+                      {
+                        type: "text",
+                        content:
+                          " which accounts are up for renewal next month, and how do their usage this month compare to 90 days ago",
+                      },
+                    ]}
+                  />
+                </SlackMessage>
+              </>
+            }
+          >
             {/* Original message echoed in thread */}
             <SlackMessage
               author="Maceo"
@@ -47,7 +109,7 @@ export const SlackLayout: React.FC = () => {
           </ThreadPanel>
         </div>
 
-        {/* Animated cursor — uses named targets from refs */}
+        {/* Animated cursor */}
         <Cursor
           keyframes={[
             // Start at bottom-right corner
@@ -60,14 +122,15 @@ export const SlackLayout: React.FC = () => {
             { frame: 130, target: "replyButton" },
             // Hold on reply button before click
             { frame: 138, target: "replyButton" },
-            // Stay during click
+            // Stay during click (thread opens)
             { frame: 142, target: "replyButton" },
-            // Drift away after click
-            { frame: 170, target: { x: 1600, y: 500 } },
-            // Off screen right
-            { frame: 195, target: { x: 1950, y: 400 } },
+            // Move to the thread reply text box
+            { frame: 165, target: "threadReplyBox" },
+            // Click the reply box
+            { frame: cursorClickReplyBox, target: "threadReplyBox" },
           ]}
-          clickFrame={138}
+          clickFrame={cursorClickReplyBox}
+          hideFrame={cursorDisappearFrame}
         />
       </div>
     </CursorTargetProvider>

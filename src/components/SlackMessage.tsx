@@ -26,6 +26,10 @@ export interface SlackMessageProps {
   cursorTargetId?: string;
   /** Cursor target ID for the reply button */
   replyTargetId?: string;
+  /** Continuation message — no avatar or name, just aligned text */
+  continuation?: boolean;
+  /** Skip the slide/fade entrance animation */
+  noAnimation?: boolean;
 }
 
 export const SlackMessage: React.FC<SlackMessageProps> = ({
@@ -44,6 +48,8 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
   highlightThreadFrame,
   cursorTargetId,
   replyTargetId,
+  continuation,
+  noAnimation,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -61,14 +67,57 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
 
   if (frame < startFrame) return null;
 
-  const opacity = interpolate(progress, [0, 1], [0, 1]);
-  const translateY = interpolate(progress, [0, 1], [30, 0]);
+  const opacity = noAnimation ? 1 : interpolate(progress, [0, 1], [0, 1]);
+  const translateY = noAnimation ? 0 : interpolate(progress, [0, 1], [30, 0]);
 
   const isHovered =
     hoverFrameStart !== undefined &&
     hoverFrameEnd !== undefined &&
     frame >= hoverFrameStart &&
     frame < hoverFrameEnd;
+
+  if (continuation) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          padding: "2px 20px",
+          margin: "0 -20px",
+          opacity,
+          transform: `translateY(${translateY}px)`,
+          position: "relative",
+          backgroundColor: isHovered
+            ? "rgba(255,255,255,0.04)"
+            : "transparent",
+        }}
+      >
+        {hoverBarShowFrame !== undefined &&
+          hoverBarHideFrame !== undefined && (
+            <MessageHoverBar
+              showFrame={hoverBarShowFrame}
+              hideFrame={hoverBarHideFrame}
+              highlightThreadFrame={highlightThreadFrame}
+              replyTargetId={replyTargetId}
+            />
+          )}
+        {/* Spacer to align with messages above */}
+        <div style={{ width: 36, flexShrink: 0 }} />
+        <div
+          ref={cursorTargetId ? messageRef : undefined}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            fontSize: 15,
+            color: "#d1d2d3",
+            lineHeight: 1.46,
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

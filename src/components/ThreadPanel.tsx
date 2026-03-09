@@ -5,11 +5,22 @@ import {
   spring,
   useVideoConfig,
 } from "remotion";
+import { useCursorTarget } from "./CursorTargetContext";
+import { TypingTextBox } from "./TypingTextBox";
 
 interface ThreadPanelProps {
   /** Frame when the panel starts opening */
   openFrame: number;
   children?: React.ReactNode;
+  /** Thread reply messages rendered after the OP */
+  threadMessages?: React.ReactNode;
+  /** Typing in the reply box config */
+  replyTyping?: {
+    text: string;
+    startFrame: number;
+    speed?: number;
+    clearFrame: number;
+  };
 }
 
 const FormatBtn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -31,9 +42,12 @@ const FormatBtn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   openFrame,
   children,
+  threadMessages,
+  replyTyping,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const replyBoxRef = useCursorTarget("threadReplyBox");
 
   if (frame < openFrame) return null;
 
@@ -51,6 +65,13 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   const contentOpacity = interpolate(slideIn, [0.4, 1], [0, 1], {
     extrapolateLeft: "clamp",
   });
+
+  // Is the reply box "focused" (after cursor clicks it)
+  const isReplyFocused =
+    replyTyping !== undefined && frame >= replyTyping.startFrame - 10;
+
+  // Show placeholder only when not focused
+  const showPlaceholder = !isReplyFocused;
 
   return (
     <div
@@ -139,13 +160,16 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
           }}
         >
           {children}
+          {threadMessages}
         </div>
 
         {/* Reply input */}
         <div style={{ padding: "0 12px 12px 12px", flexShrink: 0 }}>
           <div
             style={{
-              border: "1px solid #35373b",
+              border: isReplyFocused
+                ? "1px solid #1d9bd1"
+                : "1px solid #35373b",
               borderRadius: 8,
               backgroundColor: "#222529",
               overflow: "hidden",
@@ -204,17 +228,29 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               </FormatBtn>
             </div>
 
-            {/* Reply placeholder */}
+            {/* Reply placeholder / typing area */}
             <div
+              ref={replyBoxRef}
               style={{
                 padding: "8px 12px",
                 minHeight: 20,
-                color: "#7c7e83",
                 fontSize: 14,
-                whiteSpace: "nowrap",
+                wordBreak: "break-word",
+                whiteSpace: "pre-wrap",
               }}
             >
-              Reply...
+              {showPlaceholder ? (
+                <span style={{ color: "#7c7e83" }}>Reply...</span>
+              ) : (
+                replyTyping && (
+                  <TypingTextBox
+                    text={replyTyping.text}
+                    startFrame={replyTyping.startFrame}
+                    speed={replyTyping.speed}
+                    clearFrame={replyTyping.clearFrame}
+                  />
+                )
+              )}
             </div>
 
             {/* Also send to channel checkbox */}
@@ -260,78 +296,26 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 style={{ display: "flex", alignItems: "center", gap: 2 }}
               >
                 <FormatBtn>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                  >
-                    <circle
-                      cx="9"
-                      cy="9"
-                      r="7"
-                      stroke="#9ea0a5"
-                      strokeWidth="1.3"
-                    />
-                    <path
-                      d="M9 5V13M5 9H13"
-                      stroke="#9ea0a5"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                    />
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                    <circle cx="9" cy="9" r="7" stroke="#9ea0a5" strokeWidth="1.3" />
+                    <path d="M9 5V13M5 9H13" stroke="#9ea0a5" strokeWidth="1.3" strokeLinecap="round" />
                   </svg>
                 </FormatBtn>
                 <FormatBtn>
                   <span style={{ fontSize: 14, color: "#9ea0a5" }}>Aa</span>
                 </FormatBtn>
                 <FormatBtn>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                  >
-                    <circle
-                      cx="9"
-                      cy="9"
-                      r="7"
-                      stroke="#9ea0a5"
-                      strokeWidth="1.3"
-                    />
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                    <circle cx="9" cy="9" r="7" stroke="#9ea0a5" strokeWidth="1.3" />
                     <circle cx="6.5" cy="7.5" r="1" fill="#9ea0a5" />
                     <circle cx="11.5" cy="7.5" r="1" fill="#9ea0a5" />
-                    <path
-                      d="M6 11C6.8 12.2 8 13 9 13C10 13 11.2 12.2 12 11"
-                      stroke="#9ea0a5"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
+                    <path d="M6 11C6.8 12.2 8 13 9 13C10 13 11.2 12.2 12 11" stroke="#9ea0a5" strokeWidth="1.2" strokeLinecap="round" />
                   </svg>
                 </FormatBtn>
                 <FormatBtn>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                  >
-                    <circle
-                      cx="9"
-                      cy="9"
-                      r="7"
-                      stroke="#9ea0a5"
-                      strokeWidth="1.3"
-                    />
-                    <text
-                      x="9"
-                      y="12"
-                      textAnchor="middle"
-                      fill="#9ea0a5"
-                      fontSize="10"
-                      fontWeight="600"
-                    >
-                      @
-                    </text>
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                    <circle cx="9" cy="9" r="7" stroke="#9ea0a5" strokeWidth="1.3" />
+                    <text x="9" y="12" textAnchor="middle" fill="#9ea0a5" fontSize="10" fontWeight="600">@</text>
                   </svg>
                 </FormatBtn>
               </div>
