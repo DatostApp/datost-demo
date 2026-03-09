@@ -69,11 +69,11 @@ export const FeatureText: React.FC<FeatureTextProps> = ({
      <div style={{ maxWidth: availableWidth }}>
       <div
         style={{
-          fontSize: 42,
+          fontSize: 56,
           fontWeight: 700,
           color: "#ffffff",
           fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
-          marginBottom: subtitle || tags ? 16 : 0,
+          marginBottom: subtitle || tags ? 20 : 0,
           letterSpacing: -0.5,
         }}
       >
@@ -82,7 +82,7 @@ export const FeatureText: React.FC<FeatureTextProps> = ({
       {subtitle && (
         <div
           style={{
-            fontSize: 20,
+            fontSize: 26,
             color: "#8e9196",
             fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
             lineHeight: 1.5,
@@ -119,12 +119,12 @@ export const FeatureText: React.FC<FeatureTextProps> = ({
                     [0, 1],
                     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
                   ),
-                  padding: "8px 18px",
-                  borderRadius: 6,
+                  padding: "10px 24px",
+                  borderRadius: 8,
                   backgroundColor: "rgba(0, 122, 90, 0.12)",
                   border: "1px solid rgba(0, 122, 90, 0.3)",
                   color: "#4ade80",
-                  fontSize: 17,
+                  fontSize: 22,
                   fontWeight: 500,
                   fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
                 }}

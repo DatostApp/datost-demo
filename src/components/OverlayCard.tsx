@@ -17,7 +17,7 @@ interface OverlayCardProps {
 }
 
 /** The D-icon + "atost" wordmark, matching the official brand treatment. */
-export const DatostWordmark: React.FC<{ height?: number }> = ({ height = 70 }) => {
+export const DatostWordmark: React.FC<{ height?: number }> = ({ height = 100 }) => {
   const iconH = height;
   const iconW = iconH * (228 / 254);
   const fontSize = iconH / 0.727;
@@ -61,7 +61,7 @@ export const DatostWordmark: React.FC<{ height?: number }> = ({ height = 70 }) =
           color: "#ffffff",
           fontFamily:
             "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-          letterSpacing: -2.5,
+          letterSpacing: -3.5,
           lineHeight: 1,
         }}
       >
@@ -126,14 +126,14 @@ export const OverlayCard: React.FC<OverlayCardProps> = ({
         }}
       >
         {showLogo ? (
-          <div style={{ opacity: logoOpacity, marginBottom: 24 }}>
-            <DatostWordmark height={90} />
+          <div style={{ opacity: logoOpacity, marginBottom: 36 }}>
+            <DatostWordmark height={130} />
           </div>
         ) : (
           title && (
             <div
               style={{
-                fontSize: 54,
+                fontSize: 90,
                 fontWeight: 700,
                 color: "#ffffff",
                 fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
@@ -148,13 +148,13 @@ export const OverlayCard: React.FC<OverlayCardProps> = ({
         {subtitle && (
           <div
             style={{
-              fontSize: 28,
+              fontSize: 46,
               color: "#8e9196",
               fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
               textAlign: "center",
-              maxWidth: 750,
+              maxWidth: 1200,
               lineHeight: 1.6,
-              marginTop: showLogo ? 0 : 16,
+              marginTop: showLogo ? 0 : 20,
               opacity: interpolate(
                 frame,
                 [fadeInFrames, fadeInFrames + 10],

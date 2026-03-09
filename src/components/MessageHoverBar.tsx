@@ -23,12 +23,12 @@ const HoverIcon: React.FC<{
   <div
     ref={targetRef}
     style={{
-      width: 32,
-      height: 32,
+      width: 42,
+      height: 42,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 4,
+      borderRadius: 5,
       backgroundColor: highlighted ? "#35373b" : "transparent",
       color: highlighted ? "#e8e8e8" : "#9ea0a5",
       position: "relative",
@@ -39,15 +39,15 @@ const HoverIcon: React.FC<{
       <div
         style={{
           position: "absolute",
-          bottom: -32,
+          bottom: -42,
           left: "50%",
           transform: "translateX(-50%)",
           backgroundColor: "#1d1c1d",
           color: "#fff",
-          fontSize: 12,
+          fontSize: 16,
           fontWeight: 600,
-          padding: "4px 8px",
-          borderRadius: 4,
+          padding: "5px 10px",
+          borderRadius: 5,
           whiteSpace: "nowrap",
           border: "1px solid #4a4a4d",
           boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
@@ -86,12 +86,12 @@ export const MessageHoverBar: React.FC<MessageHoverBarProps> = ({
     <div
       style={{
         position: "absolute",
-        top: -16,
-        right: 20,
+        top: -21,
+        right: 26,
         opacity,
         display: "flex",
         border: "1px solid #35373b",
-        borderRadius: 6,
+        borderRadius: 8,
         backgroundColor: "#222529",
         boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
         overflow: "visible",

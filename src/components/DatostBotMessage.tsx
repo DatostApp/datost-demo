@@ -96,8 +96,8 @@ export interface DatostBotMessageProps {
 // --- Internal sub-components ---
 
 const thStyle: React.CSSProperties = {
-  padding: "5px 6px",
-  fontSize: 11,
+  padding: "7px 8px",
+  fontSize: 14,
   fontWeight: 600,
   color: "#9ea0a5",
   borderBottom: "1px solid #4a4a4d",
@@ -106,8 +106,8 @@ const thStyle: React.CSSProperties = {
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "4px 6px",
-  fontSize: 11,
+  padding: "5px 8px",
+  fontSize: 14,
   color: "#d1d2d3",
   borderBottom: "1px solid rgba(53,55,59,0.5)",
   whiteSpace: "nowrap",
@@ -183,20 +183,20 @@ const ToolItem: React.FC<{
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 6,
-        padding: "3px 0",
-        fontSize: 13,
+        gap: 8,
+        padding: "4px 0",
+        fontSize: 17,
         opacity: interpolate(fadeIn, [0, 1], [0, 1]),
       }}
     >
       {done ? (
-        <span style={{ fontSize: 13, flexShrink: 0 }}>✅</span>
+        <span style={{ fontSize: 17, flexShrink: 0 }}>✅</span>
       ) : (
-        <span style={{ fontSize: 13, flexShrink: 0 }}>⏳</span>
+        <span style={{ fontSize: 17, flexShrink: 0 }}>⏳</span>
       )}
       <span style={{ color: "#d1d2d3" }}>{text}</span>
       {done && timing && (
-        <span style={{ color: "#7c7e83", fontSize: 11 }}>({timing})</span>
+        <span style={{ color: "#7c7e83", fontSize: 14 }}>({timing})</span>
       )}
     </div>
   );
@@ -209,14 +209,14 @@ const ActionButton: React.FC<{ children: React.ReactNode }> = ({
     style={{
       backgroundColor: "transparent",
       border: "1px solid #35373b",
-      borderRadius: 6,
-      padding: "5px 12px",
+      borderRadius: 8,
+      padding: "7px 16px",
       color: "#1d9bd1",
-      fontSize: 12,
+      fontSize: 16,
       fontWeight: 600,
       display: "flex",
       alignItems: "center",
-      gap: 8,
+      gap: 10,
       whiteSpace: "nowrap",
     }}
   >
@@ -230,9 +230,9 @@ const ActionButton: React.FC<{ children: React.ReactNode }> = ({
 const ExcelIcon: React.FC = () => (
   <div
     style={{
-      width: 38,
-      height: 38,
-      borderRadius: 6,
+      width: 50,
+      height: 50,
+      borderRadius: 8,
       backgroundColor: "#1D6F42",
       display: "flex",
       alignItems: "center",
@@ -240,7 +240,7 @@ const ExcelIcon: React.FC = () => (
       flexShrink: 0,
     }}
   >
-    <span style={{ color: "#fff", fontSize: 20, fontWeight: 800 }}>X</span>
+    <span style={{ color: "#fff", fontSize: 26, fontWeight: 800 }}>X</span>
   </div>
 );
 
@@ -248,9 +248,9 @@ const ExcelIcon: React.FC = () => (
 const PdfIcon: React.FC = () => (
   <div
     style={{
-      width: 38,
-      height: 38,
-      borderRadius: 6,
+      width: 50,
+      height: 50,
+      borderRadius: 8,
       backgroundColor: "#D93025",
       display: "flex",
       alignItems: "center",
@@ -258,7 +258,7 @@ const PdfIcon: React.FC = () => (
       flexShrink: 0,
     }}
   >
-    <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>PDF</span>
+    <span style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>PDF</span>
   </div>
 );
 
@@ -301,7 +301,7 @@ const SpreadsheetPreview: React.FC<{
         style={{
           width: "100%",
           borderCollapse: "collapse",
-          fontSize: 8,
+          fontSize: 11,
           fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
           tableLayout: "fixed",
         }}
@@ -312,8 +312,8 @@ const SpreadsheetPreview: React.FC<{
               <th
                 key={i}
                 style={{
-                  padding: "3px 4px",
-                  fontSize: 7,
+                  padding: "4px 5px",
+                  fontSize: 10,
                   fontWeight: 700,
                   color: "#fff",
                   backgroundColor: "#4472C4",
@@ -339,8 +339,8 @@ const SpreadsheetPreview: React.FC<{
                     <td
                       key={ci}
                       style={{
-                        padding: "2px 4px",
-                        fontSize: 7,
+                        padding: "3px 5px",
+                        fontSize: 10,
                         color: isRiskCol ? getRiskTextColor(cell) : "#333",
                         fontWeight: isRiskCol || ci === 0 ? 600 : 400,
                         backgroundColor: bgColor,
@@ -397,30 +397,30 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
   const displayTitle = attachment.title || attachment.name;
 
   return (
-    <div style={{ margin: "6px 0" }}>
+    <div style={{ margin: "8px 0" }}>
       {/* Section label */}
       <div
         style={{
-          fontSize: 12,
+          fontSize: 16,
           color: "#d1d2d3",
-          marginBottom: 4,
+          marginBottom: 6,
           display: "flex",
           alignItems: "center",
-          gap: 4,
+          gap: 5,
         }}
       >
         <span>{label}</span>
-        <span style={{ fontSize: 9, color: "#9ea0a5" }}>▼</span>
+        <span style={{ fontSize: 12, color: "#9ea0a5" }}>▼</span>
       </div>
 
       {/* Preview card */}
       <div
         style={{
           border: "1px solid #35373b",
-          borderRadius: 8,
+          borderRadius: 10,
           overflow: "hidden",
           backgroundColor: "#1a1d21",
-          maxWidth: 380,
+          maxWidth: 500,
         }}
       >
         {/* Card header */}
@@ -428,15 +428,15 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            padding: "8px 10px",
+            gap: 12,
+            padding: "10px 14px",
           }}
         >
           {isExcel ? <ExcelIcon /> : <PdfIcon />}
           <div style={{ minWidth: 0 }}>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 17,
                 fontWeight: 600,
                 color: "#d1d2d3",
                 whiteSpace: "nowrap",
@@ -446,7 +446,7 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
             >
               {displayTitle}
             </div>
-            <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
+            <div style={{ fontSize: 14, color: "#9ea0a5", marginTop: 2 }}>
               {label}
             </div>
           </div>
@@ -479,21 +479,21 @@ const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "8px 12px",
+        gap: 12,
+        padding: "10px 16px",
         border: "1px solid #35373b",
-        borderRadius: 8,
+        borderRadius: 10,
         backgroundColor: "rgba(255,255,255,0.02)",
-        margin: "8px 0",
+        margin: "10px 0",
       }}
     >
-      <span style={{ fontSize: 18, flexShrink: 0 }}>
+      <span style={{ fontSize: 24, flexShrink: 0 }}>
         {attachment.type === "file" ? "📎" : "🔗"}
       </span>
       <div style={{ minWidth: 0 }}>
         <div
           style={{
-            fontSize: 13,
+            fontSize: 17,
             fontWeight: 600,
             color: attachment.type === "link" ? "#1d9bd1" : "#d1d2d3",
             whiteSpace: "nowrap",
@@ -504,7 +504,7 @@ const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
           {attachment.name}
         </div>
         {attachment.description && (
-          <div style={{ fontSize: 11, color: "#9ea0a5", marginTop: 1 }}>
+          <div style={{ fontSize: 14, color: "#9ea0a5", marginTop: 2 }}>
             {attachment.description}
           </div>
         )}
@@ -554,10 +554,10 @@ const StreamingContent: React.FC<{
         <div
           key={`p-${paragraphKey++}`}
           style={{
-            fontSize: 14,
+            fontSize: 19,
             color: "#d1d2d3",
             lineHeight: 1.5,
-            marginBottom: 8,
+            marginBottom: 10,
           }}
         >
           {paragraphChildren}
@@ -602,11 +602,11 @@ const StreamingContent: React.FC<{
           <div
             key={`bq-${i}`}
             style={{
-              margin: "0 0 8px",
-              padding: "6px 10px",
-              borderLeft: "3px solid #4a4a4d",
+              margin: "0 0 10px",
+              padding: "8px 14px",
+              borderLeft: "4px solid #4a4a4d",
               color: "#b5b7bb",
-              fontSize: 13,
+              fontSize: 17,
               fontStyle: "italic",
               ...(segment.style || {}),
             }}
@@ -637,8 +637,8 @@ const StreamingContent: React.FC<{
             src={segment.src}
             style={{
               width: "100%",
-              borderRadius: 6,
-              margin: "8px 0",
+              borderRadius: 8,
+              margin: "10px 0",
             }}
           />
         );
@@ -729,12 +729,12 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           {/* Stats line */}
           <div
             style={{
-              fontSize: 12,
+              fontSize: 16,
               color: "#9ea0a5",
-              marginBottom: 8,
+              marginBottom: 10,
               display: "flex",
               alignItems: "center",
-              gap: 4,
+              gap: 6,
               flexWrap: "wrap",
               opacity: interpolate(statsFade, [0, 1], [0, 1]),
             }}
@@ -760,18 +760,18 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           {/* Footer: sources, disclaimer, timestamp, buttons */}
           {streamDone && (
             <div style={{ opacity: interpolate(footerFade, [0, 1], [0, 1]) }}>
-              <div style={{ fontSize: 11, color: "#9ea0a5", marginBottom: 3 }}>
+              <div style={{ fontSize: 14, color: "#9ea0a5", marginBottom: 4 }}>
                 Sources:{" "}
                 <span style={{ color: "#7c7e83" }}>{response.source}</span>
               </div>
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 14,
                   color: "#7c7e83",
-                  marginBottom: 8,
+                  marginBottom: 10,
                   display: "flex",
                   alignItems: "center",
-                  gap: 4,
+                  gap: 5,
                 }}
               >
                 <span>⚡</span>
@@ -779,10 +779,10 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
                 <span>•</span>
                 <span>Verify critical information</span>
               </div>
-              <div style={{ fontSize: 12, color: "#616061", marginBottom: 8 }}>
+              <div style={{ fontSize: 16, color: "#616061", marginBottom: 10 }}>
                 {response.timestamp}
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 10 }}>
                 <ActionButton>
                   <span>📋</span>
                   <span style={{ marginLeft: 4 }}>View Full Response</span>
@@ -809,7 +809,7 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               marginBottom: 6,
             }}
           >
-            <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
+            <span style={{ fontWeight: 600, fontSize: 17, color: "#d1d2d3" }}>
               Cycle 2
             </span>
             <span>🕐</span>
@@ -826,10 +826,10 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           {additionalToolCount !== undefined && additionalToolCount > 0 && (
             <div
               style={{
-                fontSize: 12,
+                fontSize: 16,
                 color: "#7c7e83",
-                padding: "3px 0",
-                marginLeft: 19,
+                padding: "4px 0",
+                marginLeft: 25,
               }}
             >
               and {additionalToolCount} more ✅
@@ -850,7 +850,7 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
             marginBottom: 6,
           }}
         >
-          <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
+          <span style={{ fontWeight: 600, fontSize: 17, color: "#d1d2d3" }}>
             Cycle 1
           </span>
           <span>🕐</span>
@@ -874,10 +874,10 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
         {additionalToolCount !== undefined && additionalToolCount > 0 && (
           <div
             style={{
-              fontSize: 12,
+              fontSize: 16,
               color: "#7c7e83",
-              padding: "3px 0",
-              marginLeft: 19,
+              padding: "4px 0",
+              marginLeft: 25,
             }}
           >
             and {additionalToolCount} more...
@@ -891,8 +891,8 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
     <div
       style={{
         display: "flex",
-        gap: 8,
-        padding: "8px 0",
+        gap: 10,
+        padding: "10px 0",
         opacity,
         transform: `translateY(${translateY}px)`,
       }}
@@ -900,9 +900,9 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
       {/* Datost Avatar */}
       <div
         style={{
-          width: 36,
-          height: 36,
-          borderRadius: 6,
+          width: 48,
+          height: 48,
+          borderRadius: 8,
           backgroundColor: "#f0ebe4",
           display: "flex",
           alignItems: "center",
@@ -914,7 +914,7 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
         <img
           src={staticFile("datost-icon.svg")}
           alt="Datost"
-          style={{ width: 30, height: 30 }}
+          style={{ width: 40, height: 40 }}
         />
       </div>
 
@@ -925,26 +925,26 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            marginBottom: 4,
+            gap: 10,
+            marginBottom: 5,
           }}
         >
-          <span style={{ fontWeight: 700, fontSize: 15, color: "#d1d2d3" }}>
+          <span style={{ fontWeight: 700, fontSize: 20, color: "#d1d2d3" }}>
             Datost
           </span>
           <span
             style={{
-              fontSize: 11,
+              fontSize: 14,
               color: "#9ea0a5",
               backgroundColor: "rgba(255,255,255,0.06)",
-              padding: "1px 5px",
-              borderRadius: 3,
+              padding: "2px 7px",
+              borderRadius: 4,
               fontWeight: 600,
             }}
           >
             APP
           </span>
-          <span style={{ fontSize: 12, color: "#616061" }}>Just now</span>
+          <span style={{ fontSize: 16, color: "#616061" }}>Just now</span>
         </div>
 
         {/* Phase content */}

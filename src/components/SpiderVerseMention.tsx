@@ -48,7 +48,7 @@ function getLetterStyle(
   const bg = BG_COLORS[Math.floor(r(3) * BG_COLORS.length)];
   const rotation = (r(4) - 0.5) * 24;
   const scale = 0.8 + r(5) * 0.7;
-  const size = 13 + Math.floor(r(6) * 10);
+  const size = 17 + Math.floor(r(6) * 14);
   const bold = r(7) > 0.4;
   const italic = r(8) > 0.7;
   const uppercase = r(9) > 0.5;

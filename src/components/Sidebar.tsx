@@ -18,9 +18,9 @@ const SidebarIcon: React.FC<{
   >
     <div
       style={{
-        width: 36,
-        height: 36,
-        borderRadius: 8,
+        width: 44,
+        height: 44,
+        borderRadius: 10,
         backgroundColor: active ? "rgba(255,255,255,0.1)" : "transparent",
         display: "flex",
         alignItems: "center",
@@ -29,7 +29,7 @@ const SidebarIcon: React.FC<{
     >
       {icon}
     </div>
-    <span style={{ fontSize: 10, color: active ? "#fff" : "#9ea0a5" }}>
+    <span style={{ fontSize: 12, color: active ? "#fff" : "#9ea0a5" }}>
       {label}
     </span>
   </div>
@@ -43,21 +43,21 @@ const ChannelItem: React.FC<{
 }> = ({ name, active, prefix = "#", unread }) => (
   <div
     style={{
-      padding: "4px 16px 4px 12px",
+      padding: "5px 20px 5px 16px",
       display: "flex",
       alignItems: "center",
-      gap: 6,
+      gap: 8,
       backgroundColor: active ? "#1164a3" : "transparent",
-      borderRadius: 6,
-      marginLeft: 8,
-      marginRight: 8,
+      borderRadius: 8,
+      marginLeft: 10,
+      marginRight: 10,
       cursor: "pointer",
       fontWeight: unread ? 700 : 400,
       color: active ? "#fff" : unread ? "#d1d2d3" : "#9ea0a5",
-      fontSize: 14,
+      fontSize: 18,
     }}
   >
-    <span style={{ fontSize: 13, opacity: 0.7, width: 14, textAlign: "center" }}>
+    <span style={{ fontSize: 17, opacity: 0.7, width: 18, textAlign: "center" }}>
       {prefix}
     </span>
     <span
@@ -75,8 +75,8 @@ const ChannelItem: React.FC<{
 const SectionHeader: React.FC<{ label: string }> = ({ label }) => (
   <div
     style={{
-      padding: "12px 16px 4px 20px",
-      fontSize: 13,
+      padding: "16px 20px 5px 26px",
+      fontSize: 17,
       color: "#9ea0a5",
       display: "flex",
       alignItems: "center",
@@ -99,29 +99,29 @@ const DMItem: React.FC<{
 }> = ({ name, online, isYou }) => (
   <div
     style={{
-      padding: "4px 16px 4px 12px",
+      padding: "5px 20px 5px 16px",
       display: "flex",
       alignItems: "center",
-      gap: 8,
-      marginLeft: 8,
-      marginRight: 8,
-      borderRadius: 6,
+      gap: 10,
+      marginLeft: 10,
+      marginRight: 10,
+      borderRadius: 8,
       cursor: "pointer",
       color: "#9ea0a5",
-      fontSize: 14,
+      fontSize: 18,
     }}
   >
-    <div style={{ position: "relative", width: 20, height: 20 }}>
+    <div style={{ position: "relative", width: 26, height: 26 }}>
       <div
         style={{
-          width: 20,
-          height: 20,
-          borderRadius: 4,
+          width: 26,
+          height: 26,
+          borderRadius: 5,
           backgroundColor: "#5b5e63",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 10,
+          fontSize: 13,
           color: "#fff",
           fontWeight: 600,
         }}
@@ -134,8 +134,8 @@ const DMItem: React.FC<{
             position: "absolute",
             bottom: -1,
             right: -1,
-            width: 8,
-            height: 8,
+            width: 10,
+            height: 10,
             borderRadius: "50%",
             backgroundColor: "#2bac76",
             border: "2px solid #1a1d21",
@@ -146,7 +146,7 @@ const DMItem: React.FC<{
     <span>
       {name}
       {isYou && (
-        <span style={{ opacity: 0.5, fontSize: 12, marginLeft: 4 }}>you</span>
+        <span style={{ opacity: 0.5, fontSize: 15, marginLeft: 5 }}>you</span>
       )}
     </span>
   </div>
@@ -158,7 +158,7 @@ export const Sidebar: React.FC = () => {
       {/* Icon rail */}
       <div
         style={{
-          width: 60,
+          width: 72,
           backgroundColor: "#1a1d21",
           display: "flex",
           flexDirection: "column",
@@ -171,17 +171,17 @@ export const Sidebar: React.FC = () => {
         {/* Workspace icon */}
         <div
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
+            width: 44,
+            height: 44,
+            borderRadius: 10,
             backgroundColor: "#4a154b",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: 800,
             color: "#fff",
-            marginBottom: 8,
+            marginBottom: 10,
           }}
         >
           D
@@ -251,7 +251,7 @@ export const Sidebar: React.FC = () => {
       {/* Channel list */}
       <div
         style={{
-          width: 260,
+          width: 320,
           backgroundColor: "#1a1d21",
           borderRight: "1px solid #35373b",
           display: "flex",
@@ -262,14 +262,14 @@ export const Sidebar: React.FC = () => {
         {/* Workspace header */}
         <div
           style={{
-            padding: "10px 16px",
+            padding: "12px 20px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             borderBottom: "1px solid #35373b",
           }}
         >
-          <span style={{ fontWeight: 700, fontSize: 16, color: "#fff" }}>
+          <span style={{ fontWeight: 700, fontSize: 21, color: "#fff" }}>
             Datost
           </span>
         </div>
@@ -294,22 +294,22 @@ export const Sidebar: React.FC = () => {
         {/* Bottom items */}
         <div
           style={{
-            padding: "8px 12px",
+            padding: "10px 16px",
             borderTop: "1px solid #35373b",
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 3,
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
-              padding: "4px 8px",
+              gap: 10,
+              padding: "5px 10px",
               color: "#9ea0a5",
-              fontSize: 14,
-              borderRadius: 6,
+              fontSize: 18,
+              borderRadius: 8,
             }}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

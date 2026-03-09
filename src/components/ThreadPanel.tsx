@@ -24,17 +24,19 @@ interface ThreadPanelProps {
   threadMessages?: React.ReactNode;
   /** Typing in the reply box config — single session or array of sessions */
   replyTyping?: ReplyTypingSession | ReplyTypingSession[];
+  /** Opacity for panel chrome (border, header, reply box). 0–1. Default 1. */
+  chromeOpacity?: number;
 }
 
 const FormatBtn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div
     style={{
-      width: 26,
-      height: 26,
+      width: 34,
+      height: 34,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 4,
+      borderRadius: 5,
       color: "#9ea0a5",
     }}
   >
@@ -47,6 +49,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   children,
   threadMessages,
   replyTyping,
+  chromeOpacity = 1,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -105,7 +108,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
     },
   });
 
-  const width = interpolate(slideIn, [0, 1], [0, 480]);
+  const width = interpolate(slideIn, [0, 1], [0, 620]);
   const contentOpacity = interpolate(slideIn, [0.4, 1], [0, 1], {
     extrapolateLeft: "clamp",
   });
@@ -134,7 +137,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
         width,
         height: "100%",
         backgroundColor: "#1a1d21",
-        borderLeft: "1px solid #35373b",
+        borderLeft: chromeOpacity > 0 ? `1px solid rgba(53,55,59,${chromeOpacity})` : "none",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -152,18 +155,19 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
         {/* Thread header */}
         <div
           style={{
-            height: 49,
-            borderBottom: "1px solid #35373b",
+            height: 62,
+            borderBottom: chromeOpacity > 0 ? `1px solid rgba(53,55,59,${chromeOpacity})` : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0 16px",
+            padding: "0 20px",
             flexShrink: 0,
+            opacity: chromeOpacity,
           }}
         >
           <span
             style={{
-              fontSize: 16,
+              fontSize: 21,
               fontWeight: 700,
               color: "#fff",
               whiteSpace: "nowrap",
@@ -171,10 +175,10 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
           >
             Thread
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <span
               style={{
-                fontSize: 12,
+                fontSize: 16,
                 color: "#9ea0a5",
                 whiteSpace: "nowrap",
               }}
@@ -183,12 +187,12 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             </span>
             <div
               style={{
-                width: 28,
-                height: 28,
+                width: 36,
+                height: 36,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: 4,
+                borderRadius: 5,
                 color: "#9ea0a5",
               }}
             >
@@ -209,7 +213,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
           ref={containerRef}
           style={{
             flex: 1,
-            padding: "12px 16px",
+            padding: "16px 20px",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -228,13 +232,13 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
         </div>
 
         {/* Reply input */}
-        <div style={{ padding: "0 12px 12px 12px", flexShrink: 0 }}>
+        <div style={{ padding: "0 16px 16px 16px", flexShrink: 0, opacity: chromeOpacity }}>
           <div
             style={{
               border: isReplyFocused
                 ? "1px solid #1d9bd1"
                 : "1px solid #35373b",
-              borderRadius: 8,
+              borderRadius: 10,
               backgroundColor: "#222529",
               overflow: "hidden",
             }}
@@ -244,20 +248,20 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 2,
-                padding: "4px 10px",
+                gap: 3,
+                padding: "5px 14px",
                 borderBottom: "1px solid #35373b",
               }}
             >
               <FormatBtn>
-                <strong style={{ fontSize: 13, fontWeight: 800 }}>B</strong>
+                <strong style={{ fontSize: 17, fontWeight: 800 }}>B</strong>
               </FormatBtn>
               <FormatBtn>
-                <em style={{ fontSize: 13 }}>I</em>
+                <em style={{ fontSize: 17 }}>I</em>
               </FormatBtn>
               <FormatBtn>
                 <span
-                  style={{ fontSize: 13, textDecoration: "line-through" }}
+                  style={{ fontSize: 17, textDecoration: "line-through" }}
                 >
                   S
                 </span>
@@ -265,9 +269,9 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               <div
                 style={{
                   width: 1,
-                  height: 14,
+                  height: 18,
                   backgroundColor: "#35373b",
-                  margin: "0 3px",
+                  margin: "0 4px",
                 }}
               />
               <FormatBtn>
@@ -296,9 +300,9 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             <div
               ref={replyBoxRef}
               style={{
-                padding: "8px 12px",
-                minHeight: 20,
-                fontSize: 14,
+                padding: "10px 16px",
+                minHeight: 26,
+                fontSize: 18,
                 wordBreak: "break-word",
                 whiteSpace: "pre-wrap",
               }}
@@ -321,24 +325,24 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             {/* Also send to channel checkbox */}
             <div
               style={{
-                padding: "0 12px 6px",
+                padding: "0 16px 8px",
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
               }}
             >
               <div
                 style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 3,
+                  width: 18,
+                  height: 18,
+                  borderRadius: 4,
                   border: "1.5px solid #5b5e63",
                   backgroundColor: "transparent",
                 }}
               />
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 16,
                   color: "#9ea0a5",
                   whiteSpace: "nowrap",
                 }}
@@ -354,7 +358,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "4px 8px 6px",
+                padding: "5px 10px 8px",
               }}
             >
               <div
@@ -367,7 +371,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                   </svg>
                 </FormatBtn>
                 <FormatBtn>
-                  <span style={{ fontSize: 14, color: "#9ea0a5" }}>Aa</span>
+                  <span style={{ fontSize: 18, color: "#9ea0a5" }}>Aa</span>
                 </FormatBtn>
                 <FormatBtn>
                   <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
@@ -386,9 +390,9 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               </div>
               <div
                 style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 6,
+                  width: 34,
+                  height: 34,
+                  borderRadius: 8,
                   backgroundColor: "#007a5a",
                   display: "flex",
                   alignItems: "center",

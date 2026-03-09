@@ -28,9 +28,9 @@ const SmallAvatar: React.FC<{ participant: ThreadReplyParticipant }> = ({
     return (
       <div
         style={{
-          width: 22,
-          height: 22,
-          borderRadius: 4,
+          width: 28,
+          height: 28,
+          borderRadius: 5,
           backgroundColor: "#f0ebe4",
           display: "flex",
           alignItems: "center",
@@ -42,7 +42,7 @@ const SmallAvatar: React.FC<{ participant: ThreadReplyParticipant }> = ({
         <img
           src={staticFile("datost-icon.svg")}
           alt="Datost"
-          style={{ width: 18, height: 18 }}
+          style={{ width: 24, height: 24 }}
         />
       </div>
     );
@@ -52,14 +52,14 @@ const SmallAvatar: React.FC<{ participant: ThreadReplyParticipant }> = ({
   return (
     <div
       style={{
-        width: 22,
-        height: 22,
-        borderRadius: 4,
+        width: 28,
+        height: 28,
+        borderRadius: 5,
         backgroundColor: config.color,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: 10,
+        fontSize: 13,
         fontWeight: 700,
         color: "#fff",
         flexShrink: 0,
@@ -77,12 +77,12 @@ const ToolbarButton: React.FC<{ children: React.ReactNode }> = ({
 }) => (
   <div
     style={{
-      width: 28,
-      height: 28,
+      width: 36,
+      height: 36,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 4,
+      borderRadius: 5,
       color: "#9ea0a5",
     }}
   >
@@ -95,12 +95,12 @@ const FormatButton: React.FC<{ children: React.ReactNode }> = ({
 }) => (
   <div
     style={{
-      width: 28,
-      height: 28,
+      width: 36,
+      height: 36,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 4,
+      borderRadius: 5,
       color: "#9ea0a5",
     }}
   >
@@ -172,19 +172,19 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       {/* Channel header */}
       <div
         style={{
-          height: 49,
+          height: 62,
           borderBottom: "1px solid #35373b",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 20px",
+          padding: "0 26px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 13, color: "#9ea0a5" }}>#</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 17, color: "#9ea0a5" }}>#</span>
           <span
             style={{
-              fontSize: 16,
+              fontSize: 21,
               fontWeight: 700,
               color: "#fff",
             }}
@@ -209,7 +209,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
-          padding: "16px 20px",
+          padding: "20px 26px",
           overflow: "hidden",
         }}
       >
@@ -244,10 +244,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
-              marginLeft: 44,
-              marginTop: 8,
-              padding: "4px 0",
+              gap: 10,
+              marginLeft: 58,
+              marginTop: 10,
+              padding: "5px 0",
             }}
           >
             {/* Participant avatars */}
@@ -261,7 +261,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             <span
               style={{
                 color: "#1d9bd1",
-                fontSize: 13,
+                fontSize: 17,
                 fontWeight: 700,
               }}
             >
@@ -269,7 +269,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             </span>
 
             {/* Last reply time */}
-            <span style={{ color: "#616061", fontSize: 12 }}>
+            <span style={{ color: "#616061", fontSize: 16 }}>
               Last reply today at 2:43 PM
             </span>
           </div>
@@ -279,11 +279,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       </div>
 
       {/* Message input */}
-      <div style={{ padding: "0 20px 20px 20px" }}>
+      <div style={{ padding: "0 26px 26px 26px" }}>
         <div
           style={{
             border: "1px solid #35373b",
-            borderRadius: 8,
+            borderRadius: 10,
             backgroundColor: "#222529",
             overflow: "hidden",
           }}
@@ -293,28 +293,28 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
-              padding: "6px 12px",
+              gap: 3,
+              padding: "8px 16px",
               borderBottom: "1px solid #35373b",
             }}
           >
             <FormatButton>
-              <strong style={{ fontSize: 14, fontWeight: 800 }}>B</strong>
+              <strong style={{ fontSize: 18, fontWeight: 800 }}>B</strong>
             </FormatButton>
             <FormatButton>
-              <em style={{ fontSize: 14 }}>I</em>
+              <em style={{ fontSize: 18 }}>I</em>
             </FormatButton>
             <FormatButton>
-              <span style={{ fontSize: 14, textDecoration: "line-through" }}>
+              <span style={{ fontSize: 18, textDecoration: "line-through" }}>
                 S
               </span>
             </FormatButton>
             <div
               style={{
                 width: 1,
-                height: 16,
+                height: 20,
                 backgroundColor: "#35373b",
-                margin: "0 4px",
+                margin: "0 5px",
               }}
             />
             <FormatButton>
@@ -332,10 +332,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           {/* Input area */}
           <div
             style={{
-              padding: "10px 14px",
-              minHeight: 22,
+              padding: "14px 18px",
+              minHeight: 28,
               color: "#7c7e83",
-              fontSize: 14,
+              fontSize: 18,
             }}
           >
             Message #{channel}
@@ -347,7 +347,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "4px 8px 6px",
+              padding: "5px 10px 8px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -358,7 +358,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 </svg>
               </FormatButton>
               <FormatButton>
-                <span style={{ fontSize: 16, color: "#9ea0a5" }}>Aa</span>
+                <span style={{ fontSize: 20, color: "#9ea0a5" }}>Aa</span>
               </FormatButton>
               <FormatButton>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -378,9 +378,9 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 6,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
                   backgroundColor: "#007a5a",
                   display: "flex",
                   alignItems: "center",

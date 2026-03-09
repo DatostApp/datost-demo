@@ -45,16 +45,16 @@ export const OutroSequence: React.FC = () => {
       >
         {/* Wordmark */}
         <div style={{ opacity: wordmarkOpacity }}>
-          <DatostWordmark height={90} />
+          <DatostWordmark height={130} />
         </div>
 
         {/* Subtitle */}
         <div
           style={{
             opacity: subtitleOpacity,
-            fontSize: 28,
+            fontSize: 46,
             color: "#8e9196",
-            marginTop: 14,
+            marginTop: 24,
           }}
         >
           Your AI data analyst — right in Slack
@@ -64,10 +64,10 @@ export const OutroSequence: React.FC = () => {
         <div
           style={{
             opacity: urlOpacity,
-            fontSize: 30,
+            fontSize: 52,
             color: "#007a5a",
             fontWeight: 600,
-            marginTop: 44,
+            marginTop: 70,
           }}
         >
           datost.com
@@ -77,9 +77,9 @@ export const OutroSequence: React.FC = () => {
         <div
           style={{
             opacity: msgOpacity,
-            width: 700,
-            marginTop: 80,
-            fontSize: 15,
+            width: 900,
+            marginTop: 100,
+            fontSize: 20,
             color: "#d1d2d3",
           }}
         >

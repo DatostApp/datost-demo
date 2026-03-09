@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame, staticFile } from "remotion";
+import { useCurrentFrame, staticFile, interpolate } from "remotion";
 import { TitleBar } from "./TitleBar";
 import { Sidebar } from "./Sidebar";
 import { ChatArea, type ThreadReply } from "./ChatArea";
@@ -230,7 +230,7 @@ const BOT5_RESPONSE: BotResponseContent = {
         "4-page report — executive summary, charts, analysis, recommendations",
       fileType: "pdf",
       title: "Q2 Renewal Risk Report",
-      previewImage: staticFile("pdf_preview-1.png"),
+      previewImage: staticFile("pdf_preview-2.png"),
     },
   ],
   source: "Datost Prod (postgresql)",
@@ -325,6 +325,14 @@ export const SlackLayout: React.FC = () => {
 
   // ── Scene 3: Jason's @Datost message streams ──────────────────────────
   const jason2AppearFrame = messageSentFrame + 25;
+
+  // ── Fade out surrounding Slack UI after @Datost message appears ──────
+  const uiFadeStart = jason2AppearFrame + 30; // short delay after message
+  const uiFadeEnd = uiFadeStart + 40; // fade over ~1.3 seconds
+  const slackUiOpacity = interpolate(frame, [uiFadeStart, uiFadeEnd], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   // ── Bot #1 (straight to tools) ────────────────────────────────────────
   const bot1Start = 450;
@@ -435,17 +443,24 @@ export const SlackLayout: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           fontFamily: 'Lato, "Helvetica Neue", Arial, sans-serif',
-          fontSize: 15,
+          fontSize: 20,
           color: "#d1d2d3",
           position: "relative",
         }}
       >
-        <TitleBar />
+        <div style={{ opacity: slackUiOpacity }}>
+          <TitleBar />
+        </div>
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <Sidebar />
-          <ChatArea threadReplies={threadReplies} />
+          <div style={{ opacity: slackUiOpacity, display: "flex" }}>
+            <Sidebar />
+          </div>
+          <div style={{ opacity: slackUiOpacity, flex: 1, display: "flex", overflow: "hidden" }}>
+            <ChatArea threadReplies={threadReplies} />
+          </div>
           <ThreadPanel
-            openFrame={threadOpenFrame}
+            openFrame={-60}
+            chromeOpacity={slackUiOpacity}
             replyTyping={[
               {
                 text: JASON_TEXT,

@@ -4,37 +4,37 @@ export const TitleBar: React.FC = () => {
   return (
     <div
       style={{
-        height: 38,
+        height: 48,
         backgroundColor: "#1a1d21",
         display: "flex",
         alignItems: "center",
-        paddingLeft: 12,
-        paddingRight: 12,
+        paddingLeft: 16,
+        paddingRight: 16,
         borderBottom: "1px solid #35373b",
       }}
     >
       {/* Traffic lights */}
-      <div style={{ display: "flex", gap: 8, marginLeft: 4 }}>
+      <div style={{ display: "flex", gap: 10, marginLeft: 5 }}>
         <div
           style={{
-            width: 12,
-            height: 12,
+            width: 14,
+            height: 14,
             borderRadius: "50%",
             backgroundColor: "#ff5f57",
           }}
         />
         <div
           style={{
-            width: 12,
-            height: 12,
+            width: 14,
+            height: 14,
             borderRadius: "50%",
             backgroundColor: "#febc2e",
           }}
         />
         <div
           style={{
-            width: 12,
-            height: 12,
+            width: 14,
+            height: 14,
             borderRadius: "50%",
             backgroundColor: "#28c840",
           }}
@@ -45,15 +45,15 @@ export const TitleBar: React.FC = () => {
       <div
         style={{
           display: "flex",
-          gap: 4,
-          marginLeft: 16,
+          gap: 5,
+          marginLeft: 20,
           color: "#9ea0a5",
         }}
       >
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 36,
+            height: 36,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -72,8 +72,8 @@ export const TitleBar: React.FC = () => {
         </div>
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 36,
+            height: 36,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -104,15 +104,15 @@ export const TitleBar: React.FC = () => {
       >
         <div
           style={{
-            width: 520,
-            height: 26,
+            width: 640,
+            height: 34,
             backgroundColor: "#35373b",
-            borderRadius: 6,
+            borderRadius: 8,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "#9ea0a5",
-            fontSize: 13,
+            fontSize: 17,
           }}
         >
           <svg
@@ -144,7 +144,7 @@ export const TitleBar: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 12,
+          fontSize: 16,
           fontWeight: 700,
           color: "#fff",
         }}

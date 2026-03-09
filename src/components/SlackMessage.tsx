@@ -106,13 +106,13 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
             />
           )}
         {/* Spacer to align with messages above */}
-        <div style={{ width: 36, flexShrink: 0 }} />
+        <div style={{ width: 48, flexShrink: 0 }} />
         <div
           ref={cursorTargetId ? messageRef : undefined}
           style={{
             flex: 1,
             minWidth: 0,
-            fontSize: 15,
+            fontSize: 20,
             color: "#d1d2d3",
             lineHeight: 1.46,
           }}
@@ -148,14 +148,14 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
       {/* Avatar */}
       <div
         style={{
-          width: 36,
-          height: 36,
-          borderRadius: 6,
+          width: 48,
+          height: 48,
+          borderRadius: 8,
           backgroundColor: avatarColor,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 16,
+          fontSize: 22,
           fontWeight: 700,
           color: "#fff",
           flexShrink: 0,
@@ -178,7 +178,7 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
           <span
             style={{
               fontWeight: 700,
-              fontSize: 15,
+              fontSize: 20,
               color: "#d1d2d3",
             }}
           >
@@ -187,11 +187,11 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
           {isBot && (
             <span
               style={{
-                fontSize: 11,
+                fontSize: 14,
                 color: "#9ea0a5",
                 backgroundColor: "rgba(255,255,255,0.06)",
-                padding: "1px 5px",
-                borderRadius: 3,
+                padding: "2px 7px",
+                borderRadius: 4,
                 fontWeight: 600,
               }}
             >
@@ -200,7 +200,7 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
           )}
           <span
             style={{
-              fontSize: 12,
+              fontSize: 16,
               color: "#616061",
             }}
           >
@@ -212,7 +212,7 @@ export const SlackMessage: React.FC<SlackMessageProps> = ({
         <div
           ref={cursorTargetId ? messageRef : undefined}
           style={{
-            fontSize: 15,
+            fontSize: 20,
             color: "#d1d2d3",
             lineHeight: 1.46,
           }}
@@ -232,8 +232,8 @@ export const Mention: React.FC<{ children: React.ReactNode }> = ({
     style={{
       color: "#1d9bd1",
       backgroundColor: "rgba(29,155,209,0.1)",
-      borderRadius: 3,
-      padding: "0 2px",
+      borderRadius: 4,
+      padding: "0 3px",
       fontWeight: 500,
     }}
   >
@@ -249,8 +249,8 @@ export const ChannelMention: React.FC<{ children: React.ReactNode }> = ({
     style={{
       color: "#1d9bd1",
       backgroundColor: "rgba(29,155,209,0.1)",
-      borderRadius: 3,
-      padding: "0 2px",
+      borderRadius: 4,
+      padding: "0 3px",
       fontWeight: 500,
     }}
   >

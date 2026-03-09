@@ -28,8 +28,8 @@ const BouncingDot: React.FC<{ delay: number }> = ({ delay }) => {
   return (
     <div
       style={{
-        width: 6,
-        height: 6,
+        width: 8,
+        height: 8,
         borderRadius: "50%",
         backgroundColor: "#9ea0a5",
         transform: `translateY(${y}px)`,
@@ -64,9 +64,9 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
         transform: `translateY(${translateY}px)`,
         display: "flex",
         alignItems: "center",
-        gap: 4,
-        padding: "4px 0",
-        fontSize: 13,
+        gap: 5,
+        padding: "5px 0",
+        fontSize: 17,
         color: "#9ea0a5",
       }}
     >
