@@ -278,9 +278,9 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           >
             <span>2 tools executed</span>
             <span>•</span>
-            <span>✅ 2 succeeded</span>
+            <span>✅</span><span style={{ marginLeft: 4 }}>2 succeeded</span>
             <span>•</span>
-            <span>🔴 1,557ms total</span>
+            <span>🔴</span><span style={{ marginLeft: 4 }}>1,557ms total</span>
           </div>
 
           {/* Main response text */}
