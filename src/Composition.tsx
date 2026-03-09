@@ -14,6 +14,7 @@ export const MyComposition = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#0a0a0a" }}>
+      <CursorPositionProvider>
       {/* Background music plays from the very start */}
       <Audio src={staticFile("bg-music.mp3")} volume={0.3} />
 
@@ -28,11 +29,9 @@ export const MyComposition = () => {
       {/* Slack content — offset so intro plays first */}
       <Sequence from={INTRO_DURATION} durationInFrames={3100}>
         <AbsoluteFill style={{ backgroundColor: "#1a1d21" }}>
-          <CursorPositionProvider>
-            <CameraContainer>
-              <SlackLayout />
-            </CameraContainer>
-          </CursorPositionProvider>
+          <CameraContainer>
+            <SlackLayout />
+          </CameraContainer>
         </AbsoluteFill>
       </Sequence>
 
@@ -124,6 +123,7 @@ export const MyComposition = () => {
       <Sequence from={INTRO_DURATION + 3060}>
         <OutroSequence />
       </Sequence>
+      </CursorPositionProvider>
     </AbsoluteFill>
   );
 };

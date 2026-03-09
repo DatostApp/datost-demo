@@ -7,6 +7,7 @@ import {
   useFocusRectRef,
   useLastMessageHeightRef,
   useCameraPhaseRef,
+  useCameraTransformRef,
   type CameraMode,
 } from "./CursorPositionContext";
 
@@ -54,6 +55,7 @@ export const CameraContainer: React.FC<CameraContainerProps> = ({
   const focusRect = useFocusRectRef();
   const lastMsgHeight = useLastMessageHeightRef();
   const phase = useCameraPhaseRef();
+  const cameraTransform = useCameraTransformRef();
 
   const cx = width / 2;
   const cy = height / 2;
@@ -202,6 +204,9 @@ export const CameraContainer: React.FC<CameraContainerProps> = ({
   // ── Compute transform ────────────────────────────────────────────────
   const offsetX = cx - focalX * zoom;
   const offsetY = cy - focalY * zoom;
+
+  // Publish for overlays (FeatureText) to read
+  cameraTransform.current = { zoom, offsetX, offsetY };
 
   return (
     <div

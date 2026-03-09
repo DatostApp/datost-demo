@@ -24,10 +24,17 @@ export interface CameraPhase {
   startFrame: number;
 }
 
+export interface CameraTransform {
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+}
+
 type PosRef = React.MutableRefObject<Pos | null>;
 type RectRef = React.MutableRefObject<Rect | null>;
 type NumRef = React.MutableRefObject<number>;
 type PhaseRef = React.MutableRefObject<CameraPhase>;
+type TransformRef = React.MutableRefObject<CameraTransform>;
 
 interface CameraTracking {
   cursor: PosRef;
@@ -37,6 +44,7 @@ interface CameraTracking {
   threadContentHeight: NumRef;
   lastMessageHeight: NumRef;
   cameraPhase: PhaseRef;
+  cameraTransform: TransformRef;
 }
 
 const CameraTrackingContext = createContext<CameraTracking>({
@@ -47,6 +55,7 @@ const CameraTrackingContext = createContext<CameraTracking>({
   threadContentHeight: { current: 0 },
   lastMessageHeight: { current: 0 },
   cameraPhase: { current: { mode: "intro", startFrame: 0 } },
+  cameraTransform: { current: { zoom: 1, offsetX: 0, offsetY: 0 } },
 });
 
 export const CursorPositionProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -59,9 +68,10 @@ export const CursorPositionProvider: React.FC<{ children: React.ReactNode }> = (
   const threadContentHeight = useRef(0);
   const lastMessageHeight = useRef(0);
   const cameraPhase = useRef<CameraPhase>({ mode: "intro", startFrame: 0 });
+  const cameraTransform = useRef<CameraTransform>({ zoom: 1, offsetX: 0, offsetY: 0 });
   return (
     <CameraTrackingContext.Provider
-      value={{ cursor, latestMessage, replyBox, focusRect, threadContentHeight, lastMessageHeight, cameraPhase }}
+      value={{ cursor, latestMessage, replyBox, focusRect, threadContentHeight, lastMessageHeight, cameraPhase, cameraTransform }}
     >
       {children}
     </CameraTrackingContext.Provider>
@@ -77,3 +87,4 @@ export const useThreadContentHeightRef = () =>
 export const useLastMessageHeightRef = () =>
   useContext(CameraTrackingContext).lastMessageHeight;
 export const useCameraPhaseRef = () => useContext(CameraTrackingContext).cameraPhase;
+export const useCameraTransformRef = () => useContext(CameraTrackingContext).cameraTransform;
