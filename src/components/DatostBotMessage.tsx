@@ -32,8 +32,8 @@ export interface Attachment {
   name: string;
   description?: string;
   url?: string;
-  /** For rich file previews: "excel" | "pdf" */
-  fileType?: "excel" | "pdf";
+  /** For rich file previews: "excel" | "pdf" | "dashboard" */
+  fileType?: "excel" | "pdf" | "dashboard";
   /** Display title (shown large in the preview card) */
   title?: string;
   /** Preview table data for Excel-type attachments */
@@ -262,6 +262,29 @@ const PdfIcon: React.FC = () => (
   </div>
 );
 
+// --- Dashboard icon (teal grid) ---
+const DashboardIcon: React.FC = () => (
+  <div
+    style={{
+      width: 50,
+      height: 50,
+      borderRadius: 8,
+      backgroundColor: "#1d9bd1",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    }}
+  >
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#fff" />
+      <rect x="14" y="3" width="7" height="4" rx="1.5" fill="#fff" />
+      <rect x="14" y="11" width="7" height="10" rx="1.5" fill="#fff" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#fff" />
+    </svg>
+  </div>
+);
+
 // --- Mini spreadsheet preview ---
 const SpreadsheetPreview: React.FC<{
   headers?: string[];
@@ -393,7 +416,8 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
 }) => {
   const isExcel = attachment.fileType === "excel";
   const isPdf = attachment.fileType === "pdf";
-  const label = isExcel ? "Excel Spreadsheet" : isPdf ? "PDF" : "File";
+  const isDashboard = attachment.fileType === "dashboard";
+  const label = isExcel ? "Excel Spreadsheet" : isPdf ? "PDF" : isDashboard ? "Dashboard" : "File";
   const displayTitle = attachment.title || attachment.name;
 
   return (
@@ -432,7 +456,7 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
             padding: "10px 14px",
           }}
         >
-          {isExcel ? <ExcelIcon /> : <PdfIcon />}
+          {isExcel ? <ExcelIcon /> : isDashboard ? <DashboardIcon /> : <PdfIcon />}
           <div style={{ minWidth: 0 }}>
             <div
               style={{
@@ -460,6 +484,7 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
           />
         )}
         {isPdf && <PdfPreview previewImage={attachment.previewImage} />}
+        {isDashboard && <PdfPreview previewImage={attachment.previewImage} />}
       </div>
     </div>
   );
@@ -469,8 +494,8 @@ const FilePreviewCard: React.FC<{ attachment: Attachment }> = ({
 const AttachmentCard: React.FC<{ attachment: Attachment }> = ({
   attachment,
 }) => {
-  // Use rich preview for Excel/PDF files
-  if (attachment.fileType === "excel" || attachment.fileType === "pdf") {
+  // Use rich preview for Excel/PDF/Dashboard files
+  if (attachment.fileType === "excel" || attachment.fileType === "pdf" || attachment.fileType === "dashboard") {
     return <FilePreviewCard attachment={attachment} />;
   }
 
