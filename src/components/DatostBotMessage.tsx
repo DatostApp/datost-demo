@@ -7,7 +7,46 @@ import {
   staticFile,
 } from "remotion";
 
-interface DatostBotMessageProps {
+// --- Public types for configuring content ---
+
+export interface TableColumn {
+  key: string;
+  header: string;
+  /** Optional: highlight negative/positive values in this column */
+  colorize?: boolean;
+}
+
+export interface TableRow {
+  [key: string]: string | boolean | undefined;
+  /** If true, colorized columns render red; if false, green */
+  negative?: boolean;
+}
+
+export interface ToolCall {
+  name: string;
+  timing?: string;
+}
+
+export interface BotResponseContent {
+  /** Stats line, e.g. "2 tools executed" */
+  statsText: string;
+  statsSucceeded: string;
+  statsTime: string;
+  /** Main response paragraph (can include JSX) */
+  responseText: React.ReactNode;
+  /** Table columns and rows (optional — omit for no table) */
+  tableColumns?: TableColumn[];
+  tableRows?: TableRow[];
+  /** Analysis paragraph below the table */
+  analysisText: React.ReactNode;
+  /** Data source label */
+  source: string;
+  /** Timestamp shown on the final response */
+  timestamp: string;
+}
+
+export interface DatostBotMessageProps {
+  // --- Timing ---
   startFrame: number;
   phase2Frame: number;
   cycle1Frame: number;
@@ -15,94 +54,23 @@ interface DatostBotMessageProps {
   tool2DoneFrame: number;
   cycle2Frame: number;
   finalResponseFrame: number;
+
+  // --- Content ---
+  /** Phase 1 loading text (default: "Looking into that...") */
+  phase1Text?: string;
+  /** Phase 1 emoji (default: "🤔") */
+  phase1Emoji?: string;
+  /** Phase 2 loading text (default: "Querying your data sources...") */
+  phase2Text?: string;
+  /** Phase 2 emoji (default: "🔄") */
+  phase2Emoji?: string;
+  /** Tool calls shown during cycle phases */
+  tools?: ToolCall[];
+  /** Final response content */
+  response: BotResponseContent;
 }
 
-/** Spinning SVG circle used for tool execution items */
-const ToolSpinner: React.FC = () => {
-  const frame = useCurrentFrame();
-  const rotation = (frame * 10) % 360;
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      style={{
-        display: "inline-block",
-        verticalAlign: "middle",
-        transform: `rotate(${rotation}deg)`,
-        flexShrink: 0,
-      }}
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5"
-        stroke="#7c7e83"
-        strokeWidth="1.5"
-        fill="none"
-        strokeDasharray="18 14"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-};
-
-const TABLE_DATA = [
-  {
-    account: "Rivian",
-    tier: "Enterprise",
-    arr: "$340K",
-    usage90d: "12,400 sessions",
-    usageNow: "3,470",
-    change: "-72%",
-    negative: true,
-  },
-  {
-    account: "Plaid",
-    tier: "Enterprise",
-    arr: "$285K",
-    usage90d: "8,900 sessions",
-    usageNow: "3,740",
-    change: "-58%",
-    negative: true,
-  },
-  {
-    account: "Brex",
-    tier: "Growth",
-    arr: "$112K",
-    usage90d: "3,200 sessions",
-    usageNow: "1,470",
-    change: "-54%",
-    negative: true,
-  },
-  {
-    account: "Lattice",
-    tier: "Growth",
-    arr: "$98K",
-    usage90d: "2,100 sessions",
-    usageNow: "1,260",
-    change: "-40%",
-    negative: true,
-  },
-  {
-    account: "Ramp",
-    tier: "Growth",
-    arr: "$145K",
-    usage90d: "4,600 sessions",
-    usageNow: "4,140",
-    change: "-10%",
-    negative: true,
-  },
-  {
-    account: "Notion",
-    tier: "Enterprise",
-    arr: "$410K",
-    usage90d: "18,300 sessions",
-    usageNow: "19,100",
-    change: "+4%",
-    negative: false,
-  },
-];
+// --- Internal sub-components ---
 
 const thStyle: React.CSSProperties = {
   padding: "5px 6px",
@@ -122,38 +90,47 @@ const tdStyle: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-const DataTable: React.FC = () => (
+const DataTable: React.FC<{
+  columns: TableColumn[];
+  rows: TableRow[];
+}> = ({ columns, rows }) => (
   <div style={{ overflowX: "auto", margin: "8px 0" }}>
     <table
       style={{ width: "100%", borderCollapse: "collapse", borderSpacing: 0 }}
     >
       <thead>
         <tr>
-          <th style={thStyle}>Account</th>
-          <th style={thStyle}>Tier</th>
-          <th style={thStyle}>ARR</th>
-          <th style={thStyle}>Usage (90d ago)</th>
-          <th style={thStyle}>Usage (now)</th>
-          <th style={thStyle}>Change</th>
+          {columns.map((col) => (
+            <th key={col.key} style={thStyle}>
+              {col.header}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {TABLE_DATA.map((row) => (
-          <tr key={row.account}>
-            <td style={{ ...tdStyle, fontWeight: 600 }}>{row.account}</td>
-            <td style={tdStyle}>{row.tier}</td>
-            <td style={tdStyle}>{row.arr}</td>
-            <td style={tdStyle}>{row.usage90d}</td>
-            <td style={tdStyle}>{row.usageNow}</td>
-            <td
-              style={{
-                ...tdStyle,
-                color: row.negative ? "#e0564f" : "#2bac76",
-                fontWeight: 600,
-              }}
-            >
-              {row.change}
-            </td>
+        {rows.map((row, i) => (
+          <tr key={i}>
+            {columns.map((col, ci) => {
+              const val = row[col.key] as string;
+              const isFirst = ci === 0;
+              const shouldColorize = col.colorize && val;
+              return (
+                <td
+                  key={col.key}
+                  style={{
+                    ...tdStyle,
+                    fontWeight: isFirst || shouldColorize ? 600 : undefined,
+                    color: shouldColorize
+                      ? row.negative
+                        ? "#e0564f"
+                        : "#2bac76"
+                      : undefined,
+                  }}
+                >
+                  {val}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -224,6 +201,8 @@ const ActionButton: React.FC<{ children: React.ReactNode }> = ({
   </div>
 );
 
+// --- Main component ---
+
 export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   startFrame,
   phase2Frame,
@@ -232,6 +211,12 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   tool2DoneFrame,
   cycle2Frame,
   finalResponseFrame,
+  phase1Text = "Looking into that...",
+  phase1Emoji = "🤔",
+  phase2Text = "Querying your data sources...",
+  phase2Emoji = "🔄",
+  tools = [],
+  response,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -276,11 +261,13 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               flexWrap: "wrap",
             }}
           >
-            <span>2 tools executed</span>
+            <span>{response.statsText}</span>
             <span>•</span>
-            <span>✅</span><span style={{ marginLeft: 4 }}>2 succeeded</span>
+            <span>✅</span>
+            <span style={{ marginLeft: 4 }}>{response.statsSucceeded}</span>
             <span>•</span>
-            <span>🔴</span><span style={{ marginLeft: 4 }}>1,557ms total</span>
+            <span>🔴</span>
+            <span style={{ marginLeft: 4 }}>{response.statsTime}</span>
           </div>
 
           {/* Main response text */}
@@ -292,11 +279,16 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               marginBottom: 6,
             }}
           >
-            38 accounts are up for renewal in April. Most look healthy — but{" "}
-            <strong>4 accounts stand out with major usage drops:</strong>
+            {response.responseText}
           </div>
 
-          <DataTable />
+          {/* Table (optional) */}
+          {response.tableColumns && response.tableRows && (
+            <DataTable
+              columns={response.tableColumns}
+              rows={response.tableRows}
+            />
+          )}
 
           {/* Analysis */}
           <div
@@ -308,15 +300,13 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               marginBottom: 10,
             }}
           >
-            Rivian is down 72% — that&apos;s a serious red flag for a $340K
-            account. Plaid and Brex are also trending the wrong way. I&apos;d
-            prioritize these for outreach this week.
+            {response.analysisText}
           </div>
 
           {/* Sources */}
           <div style={{ fontSize: 11, color: "#9ea0a5", marginBottom: 3 }}>
             Sources:{" "}
-            <span style={{ color: "#7c7e83" }}>Datost Prod (postgresql)</span>
+            <span style={{ color: "#7c7e83" }}>{response.source}</span>
           </div>
 
           {/* Disclaimer */}
@@ -338,13 +328,19 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
 
           {/* Timestamp */}
           <div style={{ fontSize: 12, color: "#616061", marginBottom: 8 }}>
-            9:44 PM
+            {response.timestamp}
           </div>
 
           {/* Action buttons */}
           <div style={{ display: "flex", gap: 8 }}>
-            <ActionButton><span>📋</span><span style={{ marginLeft: 4 }}>View Full Response</span></ActionButton>
-            <ActionButton><span>🔁</span><span style={{ marginLeft: 4 }}>Run Again</span></ActionButton>
+            <ActionButton>
+              <span>📋</span>
+              <span style={{ marginLeft: 4 }}>View Full Response</span>
+            </ActionButton>
+            <ActionButton>
+              <span>🔁</span>
+              <span style={{ marginLeft: 4 }}>Run Again</span>
+            </ActionButton>
           </div>
         </div>
       );
@@ -361,24 +357,20 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               marginBottom: 6,
             }}
           >
-            <span
-              style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}
-            >
+            <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
               Cycle 2
             </span>
             <span>🕐</span>
           </div>
-          <ToolItem
-            text="Renewal accounts with 90-day usage comparison"
-            done
-            timing="761.6ms"
-            startFrame={0}
-          />
-          <ToolItem
-            text="Get renewal accounts and usage change"
-            done
-            startFrame={0}
-          />
+          {tools.map((tool, i) => (
+            <ToolItem
+              key={i}
+              text={tool.name}
+              done
+              timing={tool.timing}
+              startFrame={0}
+            />
+          ))}
         </div>
       );
     }
@@ -394,24 +386,26 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
               marginBottom: 6,
             }}
           >
-            <span
-              style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}
-            >
+            <span style={{ fontWeight: 600, fontSize: 13, color: "#d1d2d3" }}>
               Cycle 1
             </span>
             <span>🕐</span>
           </div>
-          <ToolItem
-            text="Renewal accounts with 90-day usage comparison"
-            done={frame >= tool1DoneFrame}
-            timing={frame >= tool1DoneFrame ? "761.6ms" : undefined}
-            startFrame={cycle1Frame + 5}
-          />
-          <ToolItem
-            text="Get renewal accounts and usage change"
-            done={frame >= tool2DoneFrame}
-            startFrame={tool1DoneFrame + 8}
-          />
+          {tools.map((tool, i) => {
+            const toolDoneFrame =
+              i === 0 ? tool1DoneFrame : tool2DoneFrame;
+            const toolStartFrame =
+              i === 0 ? cycle1Frame + 5 : tool1DoneFrame + 8;
+            return (
+              <ToolItem
+                key={i}
+                text={tool.name}
+                done={frame >= toolDoneFrame}
+                timing={frame >= toolDoneFrame ? tool.timing : undefined}
+                startFrame={toolStartFrame}
+              />
+            );
+          })}
         </div>
       );
     }
@@ -427,13 +421,13 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
             fontSize: 14,
           }}
         >
-          <span style={{ flexShrink: 0 }}>🔄</span>
-          <span>Querying your data sources...</span>
+          <span style={{ flexShrink: 0 }}>{phase2Emoji}</span>
+          <span>{phase2Text}</span>
         </div>
       );
     }
 
-    // Phase 1: Looking into that...
+    // Phase 1
     return (
       <div
         style={{
@@ -444,8 +438,8 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           fontSize: 14,
         }}
       >
-        <span style={{ flexShrink: 0 }}>🤔</span>
-        <span>Looking into that...</span>
+        <span style={{ flexShrink: 0 }}>{phase1Emoji}</span>
+        <span>{phase1Text}</span>
       </div>
     );
   };

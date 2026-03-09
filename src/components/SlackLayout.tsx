@@ -8,11 +8,59 @@ import { Cursor } from "./Cursor";
 import { SlackMessage, Mention } from "./SlackMessage";
 import { CursorTargetProvider } from "./CursorTargetContext";
 import { StreamingMessageContent } from "./StreamingMessageContent";
-import { DatostBotMessage } from "./DatostBotMessage";
+import {
+  DatostBotMessage,
+  type BotResponseContent,
+  type TableColumn,
+  type ToolCall,
+} from "./DatostBotMessage";
 import { TypingIndicator } from "./TypingIndicator";
 
 const JASON_TEXT =
   "hmm thats not great, quiet accounts right before renewal is normally bad news, do we know how active they usually are";
+
+// --- Bot response content (edit here to reuse with different data) ---
+
+const BOT_TOOLS: ToolCall[] = [
+  { name: "Renewal accounts with 90-day usage comparison", timing: "761.6ms" },
+  { name: "Get renewal accounts and usage change" },
+];
+
+const BOT_TABLE_COLUMNS: TableColumn[] = [
+  { key: "account", header: "Account" },
+  { key: "tier", header: "Tier" },
+  { key: "arr", header: "ARR" },
+  { key: "usage90d", header: "Usage (90d ago)" },
+  { key: "usageNow", header: "Usage (now)" },
+  { key: "change", header: "Change", colorize: true },
+];
+
+const BOT_TABLE_ROWS = [
+  { account: "Rivian", tier: "Enterprise", arr: "$340K", usage90d: "12,400 sessions", usageNow: "3,470", change: "-72%", negative: true },
+  { account: "Plaid", tier: "Enterprise", arr: "$285K", usage90d: "8,900 sessions", usageNow: "3,740", change: "-58%", negative: true },
+  { account: "Brex", tier: "Growth", arr: "$112K", usage90d: "3,200 sessions", usageNow: "1,470", change: "-54%", negative: true },
+  { account: "Lattice", tier: "Growth", arr: "$98K", usage90d: "2,100 sessions", usageNow: "1,260", change: "-40%", negative: true },
+  { account: "Ramp", tier: "Growth", arr: "$145K", usage90d: "4,600 sessions", usageNow: "4,140", change: "-10%", negative: true },
+  { account: "Notion", tier: "Enterprise", arr: "$410K", usage90d: "18,300 sessions", usageNow: "19,100", change: "+4%", negative: false },
+];
+
+const BOT_RESPONSE: BotResponseContent = {
+  statsText: "2 tools executed",
+  statsSucceeded: "2 succeeded",
+  statsTime: "1,557ms total",
+  responseText: (
+    <>
+      38 accounts are up for renewal in April. Most look healthy — but{" "}
+      <strong>4 accounts stand out with major usage drops:</strong>
+    </>
+  ),
+  tableColumns: BOT_TABLE_COLUMNS,
+  tableRows: BOT_TABLE_ROWS,
+  analysisText:
+    "Rivian is down 72% — that's a serious red flag for a $340K account. Plaid and Brex are also trending the wrong way. I'd prioritize these for outreach this week.",
+  source: "Datost Prod (postgresql)",
+  timestamp: "9:44 PM",
+};
 
 export const SlackLayout: React.FC = () => {
   const frame = useCurrentFrame();
@@ -127,6 +175,8 @@ export const SlackLayout: React.FC = () => {
                   tool2DoneFrame={botTool2DoneFrame}
                   cycle2Frame={botCycle2Frame}
                   finalResponseFrame={botFinalFrame}
+                  tools={BOT_TOOLS}
+                  response={BOT_RESPONSE}
                 />
 
                 {/* Maceo typing indicator in thread */}

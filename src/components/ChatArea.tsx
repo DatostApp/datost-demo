@@ -20,7 +20,45 @@ const ToolbarButton: React.FC<{ children: React.ReactNode }> = ({
   </div>
 );
 
-export const ChatArea: React.FC = () => {
+interface ChatAreaProps {
+  channel?: string;
+  message?: React.ReactNode;
+  messageAuthor?: string;
+  messageAvatarColor?: string;
+  messageAvatarInitial?: string;
+  messageTimestamp?: string;
+  messageStartFrame?: number;
+  typingName?: string;
+  typingStartFrame?: number;
+  typingEndFrame?: number;
+  hoverFrameStart?: number;
+  hoverFrameEnd?: number;
+  hoverBarShowFrame?: number;
+  hoverBarHideFrame?: number;
+  highlightThreadFrame?: number;
+  cursorTargetId?: string;
+  replyTargetId?: string;
+}
+
+export const ChatArea: React.FC<ChatAreaProps> = ({
+  channel = "all-datost",
+  message,
+  messageAuthor = "Maceo",
+  messageAvatarColor = "#4a154b",
+  messageAvatarInitial = "M",
+  messageTimestamp = "9:31 PM",
+  messageStartFrame = 60,
+  typingName = "Maceo",
+  typingStartFrame = 15,
+  typingEndFrame = 60,
+  hoverFrameStart = 108,
+  hoverFrameEnd = 155,
+  hoverBarShowFrame = 110,
+  hoverBarHideFrame = 155,
+  highlightThreadFrame = 130,
+  cursorTargetId = "maceoMessage",
+  replyTargetId = "replyButton",
+}) => {
   return (
     <div
       style={{
@@ -50,7 +88,7 @@ export const ChatArea: React.FC = () => {
               color: "#fff",
             }}
           >
-            all-datost
+            {channel}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -75,26 +113,30 @@ export const ChatArea: React.FC = () => {
         }}
       >
         <SlackMessage
-          author="Maceo"
-          avatarColor="#4a154b"
-          avatarInitial="M"
-          timestamp="9:31 PM"
-          startFrame={60}
-          hoverFrameStart={108}
-          hoverFrameEnd={155}
-          hoverBarShowFrame={110}
-          hoverBarHideFrame={155}
-          highlightThreadFrame={130}
-          cursorTargetId="maceoMessage"
-          replyTargetId="replyButton"
+          author={messageAuthor}
+          avatarColor={messageAvatarColor}
+          avatarInitial={messageAvatarInitial}
+          timestamp={messageTimestamp}
+          startFrame={messageStartFrame}
+          hoverFrameStart={hoverFrameStart}
+          hoverFrameEnd={hoverFrameEnd}
+          hoverBarShowFrame={hoverBarShowFrame}
+          hoverBarHideFrame={hoverBarHideFrame}
+          highlightThreadFrame={highlightThreadFrame}
+          cursorTargetId={cursorTargetId}
+          replyTargetId={replyTargetId}
         >
-          <Mention>Jason</Mention>, I've been looking at the renewal list for
-          next month, and pulled together some notes on where things stand. a
-          few of the big accounts feel really quiet lately. like I haven't seen
-          Rivian or Plaid in the product at all. have you noticed anything?
+          {message ?? (
+            <>
+              <Mention>Jason</Mention>, I've been looking at the renewal list for
+              next month, and pulled together some notes on where things stand. a
+              few of the big accounts feel really quiet lately. like I haven't seen
+              Rivian or Plaid in the product at all. have you noticed anything?
+            </>
+          )}
         </SlackMessage>
 
-        <TypingIndicator name="Maceo" startFrame={15} endFrame={60} />
+        <TypingIndicator name={typingName} startFrame={typingStartFrame} endFrame={typingEndFrame} />
       </div>
 
       {/* Message input */}
@@ -157,7 +199,7 @@ export const ChatArea: React.FC = () => {
               fontSize: 14,
             }}
           >
-            Message #all-datost
+            Message #{channel}
           </div>
 
           {/* Bottom toolbar */}
