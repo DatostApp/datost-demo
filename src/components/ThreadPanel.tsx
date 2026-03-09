@@ -75,10 +75,12 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
       // Track "last message height" — the height added by the most recent
       // message burst.  A burst is a sequence of frames where content grows
       // (e.g. a bot response rendering progressively).  Once content is
-      // stable for 15+ frames, the next growth starts a new burst.
+      // stable for 50+ frames (~1.7s), the next growth starts a new burst.
+      // This keeps the entire bot message (tools → streaming → footer)
+      // as one unit so the camera centers on the full message, not each paragraph.
       const delta = contentH - prevContentHRef.current;
       if (delta > 1) {
-        if (stableCountRef.current > 15) {
+        if (stableCountRef.current > 50) {
           // New burst — record the baseline
           burstBaseHRef.current = prevContentHRef.current;
         }

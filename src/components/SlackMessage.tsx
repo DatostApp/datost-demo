@@ -240,3 +240,20 @@ export const Mention: React.FC<{ children: React.ReactNode }> = ({
     @{children}
   </span>
 );
+
+/** Styled #channel mention inline */
+export const ChannelMention: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <span
+    style={{
+      color: "#1d9bd1",
+      backgroundColor: "rgba(29,155,209,0.1)",
+      borderRadius: 3,
+      padding: "0 2px",
+      fontWeight: 500,
+    }}
+  >
+    #{children}
+  </span>
+);

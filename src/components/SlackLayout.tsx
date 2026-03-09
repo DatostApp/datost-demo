@@ -5,9 +5,8 @@ import { Sidebar } from "./Sidebar";
 import { ChatArea, type ThreadReply } from "./ChatArea";
 import { ThreadPanel } from "./ThreadPanel";
 import { Cursor } from "./Cursor";
-import { SlackMessage, Mention } from "./SlackMessage";
+import { SlackMessage, Mention, ChannelMention } from "./SlackMessage";
 import { CursorTargetProvider, LATEST_MSG_TARGET, useCursorTarget } from "./CursorTargetContext";
-import { StreamingMessageContent } from "./StreamingMessageContent";
 import {
   DatostBotMessage,
   type BotResponseContent,
@@ -56,16 +55,15 @@ const BOT1_RESPONSE: BotResponseContent = {
   statsText: "2 tools executed",
   statsSucceeded: "2 succeeded",
   statsTime: "1,557ms total",
-  responseText: (
-    <>
-      38 accounts are up for renewal in April. Most look healthy — but{" "}
-      <strong>4 accounts stand out with major usage drops:</strong>
-    </>
-  ),
+  streamContent: [
+    { type: "text", content: "38 accounts are up for renewal in April. Most look healthy — but " },
+    { type: "bold", content: "4 accounts stand out with major usage drops:" },
+    { type: "table" },
+    { type: "paragraph" },
+    { type: "text", content: "Rivian is down 72% — that's a serious red flag for a $340K account. Plaid and Brex are also trending the wrong way. I'd prioritize these for outreach this week." },
+  ],
   tableColumns: BOT1_TABLE_COLUMNS,
   tableRows: BOT1_TABLE_ROWS,
-  analysisText:
-    "Rivian is down 72% — that's a serious red flag for a $340K account. Plaid and Brex are also trending the wrong way. I'd prioritize these for outreach this week.",
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
@@ -81,26 +79,19 @@ const BOT2_RESPONSE: BotResponseContent = {
   statsText: "2 tools executed",
   statsSucceeded: "2 succeeded",
   statsTime: "1,967ms total",
-  responseText: (
-    <>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Rivian</strong> is the most concerning — usage was steady at ~12K
-        sessions/week then{" "}
-        <strong>dropped off a cliff the week of January 20th</strong>. That's
-        not gradual disengagement, something specific broke.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Plaid</strong> is the opposite — a slow, steady fade from 8,900
-        down to 3,740 over 13 weeks. No single event, just gradual
-        disengagement. Harder to reverse.
-      </div>
-      <div>
-        <strong>Brex</strong> mirrors Rivian's pattern on a smaller scale. Ramp
-        and Notion are stable.
-      </div>
-    </>
-  ),
-  images: [staticFile("usage_trend_chart.png")],
+  streamContent: [
+    { type: "bold", content: "Rivian" },
+    { type: "text", content: " is the most concerning — usage was steady at ~12K sessions/week then " },
+    { type: "bold", content: "dropped off a cliff the week of January 20th" },
+    { type: "text", content: ". That's not gradual disengagement, something specific broke." },
+    { type: "paragraph" },
+    { type: "bold", content: "Plaid" },
+    { type: "text", content: " is the opposite — a slow, steady fade from 8,900 down to 3,740 over 13 weeks. No single event, just gradual disengagement. Harder to reverse." },
+    { type: "paragraph" },
+    { type: "bold", content: "Brex" },
+    { type: "text", content: " mirrors Rivian's pattern on a smaller scale. Ramp and Notion are stable." },
+    { type: "image", src: staticFile("usage_trend_chart.png") },
+  ],
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
@@ -116,39 +107,22 @@ const BOT3_RESPONSE: BotResponseContent = {
   statsText: "2 tools executed",
   statsSucceeded: "2 succeeded",
   statsTime: "1,348ms total",
-  responseText: (
-    <>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Rivian — 11 support tickets.</strong> 7 are about the same
-        issue — their SSO integration broke after the February platform update
-        (v4.2). Their team can't log in reliably. Escalated twice, no
-        resolution.
-      </div>
-      <div style={{ margin: "0 0 8px" }}>
-        <strong>Plaid — 3 tickets + NPS flag.</strong> Only minor support
-        tickets, but their latest NPS is a <strong>4 out of 10</strong>:
-      </div>
-      <div
-        style={{
-          margin: "0 0 8px",
-          padding: "6px 10px",
-          borderLeft: "3px solid #4a4a4d",
-          color: "#b5b7bb",
-          fontSize: 13,
-          fontStyle: "italic",
-        }}
-      >
-        "We've outgrown the reporting features. Evaluating alternatives that
-        offer better analytics."
-      </div>
-      <div>
-        <strong>Two different churn signals.</strong> Rivian is frustrated
-        because something <strong>broke</strong> — fixable. Plaid is{" "}
-        <strong>outgrowing us</strong> — that's a product gap, not a support
-        ticket.
-      </div>
-    </>
-  ),
+  streamContent: [
+    { type: "bold", content: "Rivian — 11 support tickets." },
+    { type: "text", content: " 7 are about the same issue — their SSO integration broke after the February platform update (v4.2). Their team can't log in reliably. Escalated twice, no resolution." },
+    { type: "paragraph" },
+    { type: "bold", content: "Plaid — 3 tickets + NPS flag." },
+    { type: "text", content: " Only minor support tickets, but their latest NPS is a " },
+    { type: "bold", content: "4 out of 10" },
+    { type: "text", content: ":" },
+    { type: "blockquote", content: "\"We've outgrown the reporting features. Evaluating alternatives that offer better analytics.\"" },
+    { type: "bold", content: "Two different churn signals." },
+    { type: "text", content: " Rivian is frustrated because something " },
+    { type: "bold", content: "broke" },
+    { type: "text", content: " — fixable. Plaid is " },
+    { type: "bold", content: "outgrowing us" },
+    { type: "text", content: " — that's a product gap, not a support ticket." },
+  ],
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
@@ -181,33 +155,26 @@ const BOT4_RESPONSE: BotResponseContent = {
   statsText: "3 tools executed",
   statsSucceeded: "3 succeeded",
   statsTime: "6,181ms total",
-  responseText: (
-    <>
-      <div style={{ margin: "0 0 8px" }}>
-        Accounts with{" "}
-        <strong>
-          low integration adoption + recent support friction
-        </strong>{" "}
-        have a <strong>6x higher rate of usage decline</strong> (p {"<"} 0.001).
-        Integration depth is the sticky factor — 3+ integrations and accounts
-        almost never churn.
-      </div>
-      <div>
-        <strong>4 more accounts fit this high-risk pattern</strong> that aren't
-        showing drops <strong>yet</strong>:
-      </div>
-    </>
-  ),
+  streamContent: [
+    { type: "text", content: "Accounts with " },
+    { type: "bold", content: "low integration adoption + recent support friction" },
+    { type: "text", content: " have a " },
+    { type: "bold", content: "6x higher rate of usage decline" },
+    { type: "text", content: " (p < 0.001). Integration depth is the sticky factor — 3+ integrations and accounts almost never churn." },
+    { type: "paragraph" },
+    { type: "bold", content: "4 more accounts fit this high-risk pattern" },
+    { type: "text", content: " that aren't showing drops " },
+    { type: "bold", content: "yet" },
+    { type: "text", content: ":" },
+    { type: "table" },
+    { type: "paragraph" },
+    { type: "text", content: "They match the profile of accounts that decline within 30-60 days. Combined with the original 4, that's " },
+    { type: "bold", content: "$1.5M in ARR" },
+    { type: "text", content: " across 8 at-risk accounts — not just $835K." },
+    { type: "image", src: staticFile("churn_risk_chart.png") },
+  ],
   tableColumns: BOT4_TABLE_COLUMNS,
   tableRows: BOT4_TABLE_ROWS,
-  analysisText: (
-    <>
-      They match the profile of accounts that decline within 30-60 days.
-      Combined with the original 4, that's <strong>$1.5M in ARR</strong> across
-      8 at-risk accounts — not just $835K.
-    </>
-  ),
-  images: [staticFile("churn_risk_chart.png")],
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
@@ -225,18 +192,12 @@ const BOT5_RESPONSE: BotResponseContent = {
   statsText: "4 tools executed",
   statsSucceeded: "4 succeeded",
   statsTime: "3,181ms total",
-  responseText: (
-    <>
-      Here's everything — full at-risk account list ranked by churn risk score,
-      plus a 4-page report with executive summary, charts, and recommendations
-      for leadership.
-      <br />
-      <br />
-      Top priority: Rivian (94), Plaid (89), and Brex (82) are critical. The 4
-      newly flagged accounts are in the 55-68 range — not on fire yet but
-      headed that direction.
-    </>
-  ),
+  streamContent: [
+    { type: "text", content: "Here's everything — full at-risk account list ranked by churn risk score, plus a 4-page report with executive summary, charts, and recommendations for leadership." },
+    { type: "paragraph" },
+    { type: "text", content: "Top priority: Rivian (94), Plaid (89), and Brex (82) are critical. The 4 newly flagged accounts are in the 55-68 range — not on fire yet but headed that direction." },
+    { type: "attachments" },
+  ],
   attachments: [
     {
       type: "file",
@@ -288,15 +249,10 @@ const BOT6_RESPONSE: BotResponseContent = {
   statsText: "3 tools executed",
   statsSucceeded: "3 succeeded",
   statsTime: "2,809ms total",
-  responseText: (
-    <>
-      Dashboard is live. It tracks all renewal accounts with usage trends,
-      support activity, integration depth, and a health score. Anything that
-      crosses into the risk zone gets flagged automatically. I'd recommend the
-      CS team checks this weekly — it'll catch the next Rivian before it becomes
-      a fire drill.
-    </>
-  ),
+  streamContent: [
+    { type: "text", content: "Dashboard is live. It tracks all renewal accounts with usage trends, support activity, integration depth, and a health score. Anything that crosses into the risk zone gets flagged automatically. I'd recommend the CS team checks this weekly — it'll catch the next Rivian before it becomes a fire drill." },
+    { type: "attachments" },
+  ],
   attachments: [
     {
       type: "link",
@@ -307,6 +263,25 @@ const BOT6_RESPONSE: BotResponseContent = {
   source: "Datost Prod (postgresql)",
   timestamp: "Just now",
 };
+
+// ─── Helper: compute when a bot message's streaming finishes ─────────────────
+
+function streamEndFrame(
+  finalFrame: number,
+  content: BotResponseContent,
+): number {
+  const speed = content.streamSpeed ?? 3.5;
+  const totalChars = content.streamContent.reduce((sum, seg) => {
+    if (seg.type === "text" || seg.type === "bold" || seg.type === "blockquote")
+      return sum + seg.content.length;
+    return sum;
+  }, 0);
+  const streamFrames = Math.ceil(totalChars / speed);
+  const footerBuffer = 20; // footer fade-in time
+  return finalFrame + streamFrames + footerBuffer;
+}
+
+const PAUSE = 60; // 2-second pause after each bot message (at 30fps)
 
 // ─── Tracker for camera to follow latest thread content ──────────────────────
 
@@ -357,71 +332,77 @@ export const SlackLayout: React.FC = () => {
   const bot1ToolDone = [495, 520];
   const bot1Cycle2 = 540;
   const bot1Final = 580;
+  const bot1End = streamEndFrame(bot1Final, BOT1_RESPONSE);
 
   // ── Maceo reacts (no typing) ────────────────────────────────────────
-  const maceoMsg1Frame = 730;
+  const maceoMsg1Frame = bot1End + PAUSE;
 
   // ── Maceo asks for trends (no typing) ─────────────────────────────────
-  const maceoMsg2Frame = 780;
+  const maceoMsg2Frame = maceoMsg1Frame + 50;
 
   // ── Bot #2 ────────────────────────────────────────────────────────────
-  const bot2Start = 830;
-  const bot2Cycle1 = 840;
-  const bot2ToolDone = [875, 900];
-  const bot2Cycle2 = 920;
-  const bot2Final = 960;
+  const bot2Start = maceoMsg2Frame + 50;
+  const bot2Cycle1 = bot2Start + 10;
+  const bot2ToolDone = [bot2Cycle1 + 35, bot2Cycle1 + 60];
+  const bot2Cycle2 = bot2ToolDone[1] + 20;
+  const bot2Final = bot2Cycle2 + 40;
+  const bot2End = streamEndFrame(bot2Final, BOT2_RESPONSE);
 
   // ── Maceo asks about support tickets (no typing) ──────────────────────
-  const maceoMsg3Frame = 1110;
+  const maceoMsg3Frame = bot2End + PAUSE;
 
   // ── Bot #3 ────────────────────────────────────────────────────────────
-  const bot3Start = 1160;
-  const bot3Cycle1 = 1170;
-  const bot3ToolDone = [1205, 1235];
-  const bot3Cycle2 = 1255;
-  const bot3Final = 1295;
+  const bot3Start = maceoMsg3Frame + 50;
+  const bot3Cycle1 = bot3Start + 10;
+  const bot3ToolDone = [bot3Cycle1 + 35, bot3Cycle1 + 65];
+  const bot3Cycle2 = bot3ToolDone[1] + 20;
+  const bot3Final = bot3Cycle2 + 40;
+  const bot3End = streamEndFrame(bot3Final, BOT3_RESPONSE);
 
   // ── Maceo pivots to bigger picture (no typing) ────────────────────────
-  const maceoMsg4Frame = 1445;
+  const maceoMsg4Frame = bot3End + PAUSE;
 
   // ── Jason asks for churn analysis (no typing) ─────────────────────────
-  const jasonMsg1Frame = 1495;
+  const jasonMsg1Frame = maceoMsg4Frame + 50;
 
   // ── Bot #4 (3 tools) ─────────────────────────────────────────────────
-  const bot4Start = 1545;
-  const bot4Cycle1 = 1555;
-  const bot4ToolDone = [1595, 1635, 1665];
-  const bot4Cycle2 = 1690;
-  const bot4Final = 1735;
+  const bot4Start = jasonMsg1Frame + 50;
+  const bot4Cycle1 = bot4Start + 10;
+  const bot4ToolDone = [bot4Cycle1 + 40, bot4Cycle1 + 80, bot4Cycle1 + 110];
+  const bot4Cycle2 = bot4ToolDone[2] + 25;
+  const bot4Final = bot4Cycle2 + 45;
+  const bot4End = streamEndFrame(bot4Final, BOT4_RESPONSE);
 
   // ── Jason wants action (no typing) ────────────────────────────────────
-  const jasonMsg2Frame = 1885;
+  const jasonMsg2Frame = bot4End + PAUSE;
 
   // ── Maceo asks for combined export + report (no typing) ───────────────
-  const maceoMsg5Frame = 1935;
+  const maceoMsg5Frame = jasonMsg2Frame + 50;
 
   // ── Bot #5 (4 tools) ─────────────────────────────────────────────────
-  const bot5Start = 1985;
-  const bot5Cycle1 = 1995;
-  const bot5ToolDone = [2035, 2070, 2100, 2125];
-  const bot5Cycle2 = 2150;
-  const bot5Final = 2195;
+  const bot5Start = maceoMsg5Frame + 50;
+  const bot5Cycle1 = bot5Start + 10;
+  const bot5ToolDone = [bot5Cycle1 + 40, bot5Cycle1 + 75, bot5Cycle1 + 105, bot5Cycle1 + 130];
+  const bot5Cycle2 = bot5ToolDone[3] + 25;
+  const bot5Final = bot5Cycle2 + 45;
+  const bot5End = streamEndFrame(bot5Final, BOT5_RESPONSE);
 
   // ── Jason wants ongoing monitoring (no typing) ────────────────────────
-  const jasonMsg3Frame = 2325;
+  const jasonMsg3Frame = bot5End + PAUSE;
 
   // ── Maceo asks for dashboard (no typing) ──────────────────────────────
-  const maceoMsg6Frame = 2375;
+  const maceoMsg6Frame = jasonMsg3Frame + 50;
 
   // ── Bot #6 (3 tools) ─────────────────────────────────────────────────
-  const bot6Start = 2425;
-  const bot6Cycle1 = 2435;
-  const bot6ToolDone = [2470, 2505, 2535];
-  const bot6Cycle2 = 2560;
-  const bot6Final = 2605;
+  const bot6Start = maceoMsg6Frame + 50;
+  const bot6Cycle1 = bot6Start + 10;
+  const bot6ToolDone = [bot6Cycle1 + 35, bot6Cycle1 + 70, bot6Cycle1 + 100];
+  const bot6Cycle2 = bot6ToolDone[2] + 25;
+  const bot6Final = bot6Cycle2 + 40;
+  const bot6End = streamEndFrame(bot6Final, BOT6_RESPONSE);
 
   // ── Maceo closing (no typing) ─────────────────────────────────────────
-  const maceoMsg7Frame = 2705;
+  const maceoMsg7Frame = bot6End + PAUSE;
 
   // ── Thread reply milestones (for channel message indicator) ──────────
   const threadReplies: ThreadReply[] = [
@@ -486,7 +467,7 @@ export const SlackLayout: React.FC = () => {
                   {JASON_TEXT}
                 </SlackMessage>
 
-                {/* ── Jason's @Datost message (streaming) ──────────── */}
+                {/* ── Jason's @Datost message (appears instantly) ──── */}
                 <SlackMessage
                   author={JASON.author}
                   avatarColor={JASON.color}
@@ -494,21 +475,10 @@ export const SlackLayout: React.FC = () => {
                   timestamp="Just now"
                   startFrame={jason2AppearFrame}
                   continuation
-                  noAnimation
                 >
-                  <StreamingMessageContent
-                    startFrame={jason2AppearFrame}
-                    speed={0.7}
-                    spiderverseDuration={30}
-                    segments={[
-                      { type: "mention", content: "Datost" },
-                      {
-                        type: "text",
-                        content:
-                          " which accounts are up for renewal next month, and how do their usage this month compare to 90 days ago",
-                      },
-                    ]}
-                  />
+                  <Mention>Datost</Mention> which accounts are up for renewal
+                  next month, and how do their usage this month compare to 90
+                  days ago
                 </SlackMessage>
 
                 {/* ── Bot response #1 ──────────────────────────────── */}
@@ -698,7 +668,7 @@ export const SlackLayout: React.FC = () => {
                   timestamp="Just now"
                   startFrame={maceoMsg7Frame}
                 >
-                  done, dropping this in #cs-renewals. we just went from "I have
+                  done, dropping this in <ChannelMention>cs-renewals</ChannelMention>. we just went from "I have
                   a bad feeling about some accounts" to a full churn prevention
                   system in one thread
                 </SlackMessage>

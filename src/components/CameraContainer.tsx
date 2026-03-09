@@ -23,7 +23,7 @@ const TRANSITION_FRAMES: Record<CameraMode, number> = {
   messageFocus: 18,
   cursorTrack: 12,
   replyBox: 10,
-  thread: 40,
+  thread: 25,
 };
 
 // Target tilt per mode
@@ -63,7 +63,7 @@ export const CameraContainer: React.FC<CameraContainerProps> = ({
     Math.min(Math.max(v, lo), hi);
 
   // ── Pan tolerance — ignore shifts smaller than this (in content px) ──
-  const PAN_TOLERANCE = 20;
+  const PAN_TOLERANCE = 10;
   const committedTargetRef = useRef<{ x: number; y: number }>({ x: cx, y: cy });
 
   // ── Snapshot refs for smooth transitions ──────────────────────────────
@@ -103,20 +103,21 @@ export const CameraContainer: React.FC<CameraContainerProps> = ({
 
   // Thread zoom: fit the latest message (+ padding) inside the viewport.
   // At zoom z the viewport shows height/z content-pixels vertically.
-  const THREAD_ZOOM_PADDING = 280; // breathing room for avatar/header above + reply box below
+  const THREAD_ZOOM_PADDING = 300; // breathing room for avatar/header above + reply box below
   const msgH = lastMsgHeight.current || 0;
   const rawThreadZoom =
     msgH > 0
-      ? clamp(height / (msgH + THREAD_ZOOM_PADDING), 1.15, 1.8)
+      ? clamp(height / (msgH + THREAD_ZOOM_PADDING), 1.0, 1.8)
       : 1.8;
 
   // Smooth-follow the thread zoom so it doesn't jump when a new message
   // of a different size appears.
   const smoothThreadZoomRef = useRef(rawThreadZoom);
-  const THREAD_ZOOM_FOLLOW = 0.07; // ~7 % of the gap closed per frame
   if (mode === "thread") {
-    smoothThreadZoomRef.current +=
-      (rawThreadZoom - smoothThreadZoomRef.current) * THREAD_ZOOM_FOLLOW;
+    const zoomDelta = rawThreadZoom - smoothThreadZoomRef.current;
+    // Zoom out faster (content growing) than zoom in (new shorter message)
+    const followSpeed = zoomDelta < 0 ? 0.25 : 0.10;
+    smoothThreadZoomRef.current += zoomDelta * followSpeed;
   } else {
     // Stay in sync when not in thread mode so the first frame is correct
     smoothThreadZoomRef.current = rawThreadZoom;
@@ -168,8 +169,8 @@ export const CameraContainer: React.FC<CameraContainerProps> = ({
       break;
     case "thread":
       rawX = latestMsg.current?.x ?? cx;
-      // Center on the vertical middle of the latest message, not its bottom edge
-      rawY = (latestMsg.current?.y ?? cy) - (lastMsgHeight.current / 2);
+      // Center on the vertical middle of the latest message
+      rawY = (latestMsg.current?.y ?? cy) - (lastMsgHeight.current * 0.5);
       break;
   }
 
