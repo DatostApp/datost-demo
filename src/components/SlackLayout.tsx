@@ -1,4 +1,5 @@
 import React from "react";
+import { useCurrentFrame, staticFile } from "remotion";
 import { TitleBar } from "./TitleBar";
 import { Sidebar } from "./Sidebar";
 import { ChatArea, type ThreadReply } from "./ChatArea";
@@ -13,7 +14,7 @@ import {
   type TableColumn,
   type ToolCall,
 } from "./DatostBotMessage";
-import { staticFile } from "remotion";
+import { useCameraPhaseRef, type CameraMode } from "./CursorPositionContext";
 
 
 // ─── Character constants ─────────────────────────────────────────────────────
@@ -295,6 +296,13 @@ const LatestMessageTracker: React.FC = () => {
 // ─── Main layout ─────────────────────────────────────────────────────────────
 
 export const SlackLayout: React.FC = () => {
+  const frame = useCurrentFrame();
+  const cameraPhaseRef = useCameraPhaseRef();
+
+  // ── Scene 0: Camera phases ──────────────────────────────────────────────
+  const messageAppearFrame = 60;
+  const cursorHoverStartFrame = 108;
+
   // ── Scene 1: Thread opens ──────────────────────────────────────────────
   const threadOpenFrame = 142;
   const cursorClickReplyBox = 172;
@@ -305,6 +313,18 @@ export const SlackLayout: React.FC = () => {
   const typingEndFrame =
     typingStartFrame + Math.ceil(JASON_TEXT.length * 0.85) + 10;
   const messageSentFrame = typingEndFrame + 5;
+
+  // ── Write camera phase ──────────────────────────────────────────────────
+  let cameraMode: CameraMode;
+  if (frame < messageAppearFrame) cameraMode = "intro";
+  else if (frame < cursorHoverStartFrame) cameraMode = "messageFocus";
+  else if (frame < cursorDisappearFrame) cameraMode = "cursorTrack";
+  else if (frame < messageSentFrame) cameraMode = "replyBox";
+  else cameraMode = "thread";
+
+  if (cameraMode !== cameraPhaseRef.current.mode) {
+    cameraPhaseRef.current = { mode: cameraMode, startFrame: frame };
+  }
 
   // ── Scene 3: Jason's @Datost message streams ──────────────────────────
   const jason2AppearFrame = messageSentFrame + 25;

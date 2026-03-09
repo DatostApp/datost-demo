@@ -6,7 +6,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { useCursorTarget } from "./CursorTargetContext";
-import { useThreadContentHeightRef } from "./CursorPositionContext";
+import { useThreadContentHeightRef, useLastMessageHeightRef } from "./CursorPositionContext";
 import { TypingTextBox } from "./TypingTextBox";
 
 interface ReplyTypingSession {
@@ -55,6 +55,10 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrollOffset, setScrollOffset] = useState(0);
   const threadHeightRef = useThreadContentHeightRef();
+  const lastMsgHeightRef = useLastMessageHeightRef();
+  const prevContentHRef = useRef(0);
+  const burstBaseHRef = useRef(0);
+  const stableCountRef = useRef(0);
 
   // Measure content vs container and auto-scroll to keep bottom visible.
   // Intentionally runs every render (every frame) to track dynamic content.
@@ -67,6 +71,23 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
       setScrollOffset(overflow);
       // Publish content height so the camera can derive dynamic zoom
       threadHeightRef.current = contentH;
+
+      // Track "last message height" — the height added by the most recent
+      // message burst.  A burst is a sequence of frames where content grows
+      // (e.g. a bot response rendering progressively).  Once content is
+      // stable for 15+ frames, the next growth starts a new burst.
+      const delta = contentH - prevContentHRef.current;
+      if (delta > 1) {
+        if (stableCountRef.current > 15) {
+          // New burst — record the baseline
+          burstBaseHRef.current = prevContentHRef.current;
+        }
+        stableCountRef.current = 0;
+        lastMsgHeightRef.current = contentH - burstBaseHRef.current;
+      } else {
+        stableCountRef.current++;
+      }
+      prevContentHRef.current = contentH;
     }
   });
 
