@@ -230,10 +230,9 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         >
           {message ?? (
             <>
-              <Mention>Jason</Mention>, I've been looking at the renewal list for
-              next month, and pulled together some notes on where things stand. a
-              few of the big accounts feel really quiet lately. like I haven't seen
-              Rivian or Plaid in the product at all. have you noticed anything?
+              <Mention>Jason</Mention> been looking at next month's renewals.
+              some of the big accounts feel really quiet, haven't seen Rivian
+              or Plaid in the product at all
             </>
           )}
         </SlackMessage>

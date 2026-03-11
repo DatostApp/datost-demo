@@ -57,7 +57,7 @@ export const OutroSequence: React.FC = () => {
             marginTop: 24,
           }}
         >
-          Your AI data analyst — right in Slack
+          Your AI data analyst, right in Slack
         </div>
 
         {/* URL */}
@@ -91,9 +91,9 @@ export const OutroSequence: React.FC = () => {
             startFrame={0}
             noAnimation
           >
-            done, dropping this in <ChannelMention>cs-renewals</ChannelMention>. we just went from
-            &ldquo;I have a bad feeling about some accounts&rdquo; to a full
-            churn prevention system in one thread
+            dropping this in <ChannelMention>cs-renewals</ChannelMention>. went from
+            &ldquo;bad feeling about some accounts&rdquo; to a full churn
+            prevention system in one thread
           </SlackMessage>
         </div>
       </AbsoluteFill>

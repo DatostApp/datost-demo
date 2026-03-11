@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useLayoutEffect } from "react";
 import {
   useCurrentFrame,
   spring,
@@ -709,6 +709,19 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // Track max phase-content height so it never shrinks during phase
+  // transitions (cycle2 → final).  A height drop would cause the
+  // camera's burst-detection to start a false new burst and break
+  // vertical centering.
+  const phaseRef = useRef<HTMLDivElement>(null);
+  const maxPhaseH = useRef(0);
+  useLayoutEffect(() => {
+    if (phaseRef.current) {
+      const h = phaseRef.current.scrollHeight;
+      if (h > maxPhaseH.current) maxPhaseH.current = h;
+    }
+  });
+
   if (frame < startFrame) return null;
 
   const enterProgress = spring({
@@ -972,8 +985,10 @@ export const DatostBotMessage: React.FC<DatostBotMessageProps> = ({
           <span style={{ fontSize: 16, color: "#616061" }}>Just now</span>
         </div>
 
-        {/* Phase content */}
-        {renderPhaseContent()}
+        {/* Phase content — minHeight prevents shrinkage during transitions */}
+        <div ref={phaseRef} style={{ minHeight: maxPhaseH.current }}>
+          {renderPhaseContent()}
+        </div>
       </div>
     </div>
   );

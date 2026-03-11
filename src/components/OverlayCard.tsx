@@ -85,25 +85,18 @@ export const OverlayCard: React.FC<OverlayCardProps> = ({
   const clampOpts = { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as const };
 
   const opacity = (() => {
-    if (fadeOutFrames <= 0) {
-      return interpolate(frame, [0, fadeInFrames], [0, 1], clampOpts);
-    }
+    if (fadeOutFrames <= 0) return 1;
     return interpolate(
       frame,
-      [0, fadeInFrames, durationInFrames - fadeOutFrames, durationInFrames],
-      [0, 1, 1, 0],
+      [durationInFrames - fadeOutFrames, durationInFrames],
+      [1, 0],
       clampOpts,
     );
   })();
 
-  const contentY = interpolate(frame, [0, fadeInFrames + 5], [12, 0], clampOpts);
+  const contentY = 0;
 
-  const logoOpacity = interpolate(
-    frame,
-    [fadeInFrames * 0.3, fadeInFrames],
-    [0, 1],
-    clampOpts,
-  );
+  const logoOpacity = 1;
 
   return (
     <AbsoluteFill
@@ -155,12 +148,7 @@ export const OverlayCard: React.FC<OverlayCardProps> = ({
               maxWidth: 1200,
               lineHeight: 1.6,
               marginTop: showLogo ? 0 : 20,
-              opacity: interpolate(
-                frame,
-                [fadeInFrames, fadeInFrames + 10],
-                [0, 1],
-                clampOpts,
-              ),
+              opacity: 1,
             }}
           >
             {subtitle}
